@@ -213,7 +213,7 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        console.log('กำลังดาวน์โหลดข้อมูลและจับคู่คอลัมน์...');
+        console.log('กำลังดาวน์โหลดข้อมูลและตรวจสอบโครงสร้างคอลัมน์...');
         
         const [txnRes, quotaRes] = await Promise.all([
           fetch(TRANSACTION_API_URL).then(res => {
@@ -230,7 +230,7 @@
           throw new Error(txnRes.error || quotaRes.error || 'โครงสร้างข้อมูลผิดพลาดหรือสิทธิ์ใช้งาน API เต็ม');
         }
 
-        // 1. จัดการตารางชีต Transaction
+        // 1. ตารางชีต Transaction (ล้าง format บัตรให้ตรงกัน)
         TXN_DATA = txnRes.map((item) => {
           const qty = parseFloat(item['จำนวนลิตร'] || item['ปริมาณ'] || 0);
           const excl = parseFloat(item['ยอดรวม Excl.VAT (บาท)'] || item['ยอดรวม Excl.VAT'] || 0);
@@ -261,14 +261,14 @@
           };
         });
 
-        // 2. จัดการตารางชีต Quota
+        // 2. ตารางชีต Quota (จับคู่คอลัมน์ N และ คอลัมน์ O ให้ถูกต้องตามข้อมูลจริง)
         quotaRes.forEach(item => {
-          let rawCard = item['Fleet Card'] || '';
+          let rawCard = item['Fleet Card'] || item['FleetCard'] || '';
           let cleanCard = String(rawCard).replace(/[^0-9]/g, '').trim();
           
           if (cleanCard) {
             QUOTA_DATA[cleanCard] = {
-              empCode: String(item['Employee Code'] || '').trim(), 
+              empCode: String(item['Employee Code'] || item['EmployeeCode'] || '').trim(), 
               name: String(item['Name'] || '').trim(),             
               company: String(item['Company'] || 'TD').trim(),     
               team: String(item['Team'] || '').trim(),             
@@ -278,8 +278,8 @@
               mayQty: parseFloat(item['May'] || 0),                
               junQty: parseFloat(item['Jun'] || 0),                
               avgQty: parseFloat(item['Avg'] || 0),                
-              m1Quota: parseFloat(item['1Q'] || 0),               
-              q3Quota: parseFloat(item['ลิตร1M'] || 0)              
+              m1Quota: parseFloat(item['ลิตร1M'] || item['1M'] || 0),   // คอลัมน์ N: สิทธิ์ต่อเดือน 
+              q3Quota: parseFloat(item['1Q'] || item['Q3'] || 0)       // คอลัมน์ O: โควต้ารายไตรมาส (ใช้แสดงใน KPI สุทธิด้วย)
             };
           }
         });
@@ -342,6 +342,8 @@
       
       errBox.style.display = 'none';
       currentCard = input;
+      
+      // ฟิลเตอร์หา Transaction ที่ผูกกับหมายเลขบัตรใบนี้
       currentTxn = TXN_DATA.filter(t => t.card === currentCard);
       currentPage = 1;
       
@@ -371,16 +373,16 @@
       const may = info.mayQty || 0;
       const jun = info.junQty || 0;
       
-      // ดึงค่าแสดงในกล่องสีน้ำเงินด้านบน
+      // แสดงผลข้อมูลสิทธิ์ในแถบน้ำเงินด้านบน
       document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
       document.getElementById('calcAvg').innerText = `${(info.avgQty || 0).toLocaleString()} ลิตร`;
-      document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; 
-      document.getElementById('calcTotal').innerText = `${(info.q3Quota || 0).toLocaleString()} ลิตร`; 
+      document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; // ดึงจากคอลัมน์ N 
+      document.getElementById('calcTotal').innerText = `${(info.q3Quota || 0).toLocaleString()} ลิตร`; // ดึงจากคอลัมน์ O
 
-      // ดึงค่าโควต้าสุทธิอิงตามคอลัมน์ O
+      // โควต้าสุทธิประจำไตรมาสนี้ ดึงมาจากคอลัมน์ O เป๊ะๆ
       const displayQuota = info.q3Quota || 0; 
       
-      // คำนวณปริมาณที่ใช้สะสมจริงใน ไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
+      // คำนวณยอดเติมจริงสะสมของไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
       const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
       const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
       const remainQty = displayQuota - usedQty;
@@ -407,13 +409,12 @@
       renderTxnPage();
     }
 
-    // ฟังก์ชันคำนวณครบทุกเดือนแบบ Dynamic จากฐานข้อมูลจริง
     function renderMonthlySummary(){
       const tbody = document.getElementById('monthBody');
       if(!tbody) return;
       
       if(!currentTxn.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่มีข้อมูลธุรกรรมของบัตรใบนี้</td></tr>`;
         return;
       }
 
@@ -458,7 +459,7 @@
       if(!tbody) return;
       
       if(!currentTxn.length){
-        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่มีข้อมูลธุรกรรมของบัตรใบนี้</td></tr>`;
         document.getElementById('paginationWrap').innerHTML = '';
         return;
       }
