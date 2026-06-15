@@ -91,7 +91,7 @@
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
       
       <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white p-6 rounded-2xl shadow-lg border border-blue-950">
-        <h3 class="font-bold text-base text-blue-200 mb-4 flex items-center gap-2">📊 ข้อมูลสิทธิ์ประมวลผลโควต้าน้ำมัน ประจำไตรมาส 3 (Q3/2026)</h3>
+        <h3 class="font-bold text-base text-blue-200 mb-4 flex items-center gap-2">📊 ข้อมูลสิทธิ์ประมวลผลโควต้าน้ำมัน สะสมปี 2569 (YTD 2026)</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
             <span class="text-xs text-blue-200 block">ยอดเติมจริงย้อนหลัง Q2</span>
@@ -106,7 +106,7 @@
             <span id="calcRound" class="text-lg font-bold mt-1 block text-emerald-300">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">โควต้ารายไตรมาส</span>
+            <span class="text-xs text-blue-200 block">โควต้ารายไตรมาส (Q3)</span>
             <span id="calcTotal" class="text-xl font-extrabold mt-1 block text-cyan-300">—</span>
           </div>
         </div>
@@ -114,15 +114,15 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="kpi-card kpi-blue">
-          <div class="kpi-lbl">โควต้าสุทธิประจำไตรมาสนี้ (ลิตร)</div>
+          <div class="kpi-lbl">โควต้าสิทธิ์ประจำงวด (ลิตร)</div>
           <div id="kpiQuota" class="kpi-num text-blue-900">—</div>
         </div>
         <div class="kpi-card border-left-[5px] border-slate-500">
-          <div class="kpi-lbl">ปริมาณที่เติมไปแล้วสะสม (ลิตร)</div>
+          <div class="kpi-lbl">ปริมาณเติมสะสมรวมตั้งแต่ ม.ค. 2569 (ลิตร)</div>
           <div id="kpiUsed" class="kpi-num text-slate-800">—</div>
         </div>
         <div id="kpiRemainCard" class="kpi-card kpi-amber">
-          <div class="kpi-lbl">คงเหลือไตรมาสนี้ (ลิตร)</div>
+          <div class="kpi-lbl">คงเหลือใช้งาน (ลิตร)</div>
           <div id="kpiRemain" class="kpi-num text-amber-700">—</div>
         </div>
       </div>
@@ -166,7 +166,7 @@
           <div class="section-head">
             <div class="section-head-left">
               <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-              <h3>รายการเติมน้ำมันทั้งหมด</h3>
+              <h3>รายการเติมน้ำมันทั้งหมด (ตั้งแต่ ม.ค. 2569)</h3>
             </div>
             <button class="btn-dl" onclick="downloadXlsx()">
               <svg viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
@@ -206,7 +206,7 @@
 
     let TXN_DATA = [];
     let QUOTA_DATA = {};
-    let EMP_CODE_LOOKUP = {}; // Lookup สำหรับ Map ชื่อพนักงานและทะเบียนรถด้วย Employee_code.1
+    let EMP_CODE_LOOKUP = {}; 
     let currentCard = '';
     let currentTxn = [];
     let currentPage = 1;
@@ -225,7 +225,6 @@
           throw new Error('โครงสร้าง API ข้อมูลผิดพลาดหรือโควต้าใช้งาน SheetDB เต็ม');
         }
 
-        // 1. จัดการข้อมูลสิทธิ์ Quota และทำ Lookup Table รอไว้
         quotaRes.forEach(item => {
           let rawCard = item['Fleet Card'] || item['FleetCard'] || '';
           let cleanCard = String(rawCard).replace(/[^0-9]/g, '').trim();
@@ -252,11 +251,10 @@
             QUOTA_DATA[cleanCard] = quotaObj;
           }
           if (empCode) {
-            EMP_CODE_LOOKUP[empCode] = quotaObj; // ผูกข้อมูลพนักงานกับรหัสไว้เรียกดึงจากฝั่ง Transaction
+            EMP_CODE_LOOKUP[empCode] = quotaObj; 
           }
         });
 
-        // 2. แปลงข้อมูลแถวจาก Transaction ให้เป็นฟิลด์ตามที่ระบุ
         TXN_DATA = txnRes.map(item => {
           const qty = parseFloat(item['QTY_LITRE'] || 0);
           const excl = parseFloat(item['EXCLUDE_VAT_AMOUNT'] || 0);
@@ -266,7 +264,6 @@
           let rawCard = item['CARD_NO'] || '';
           let cleanCard = String(rawCard).replace(/[^0-9]/g, '').trim();
           
-          // ดึงเดือนและปีสำหรับทำสรุปรายเดือน
           let month = 0, year = 2026;
           if (dateStr && dateStr.includes('/')) {
             const parts = dateStr.split('/');
@@ -276,7 +273,6 @@
             }
           }
 
-          // ค้นหาข้อมูลชื่อและทะเบียนรถจาก Quota โดยใช้รหัสพนักงาน Map
           const matchedQuota = EMP_CODE_LOOKUP[empCode] || {};
           const empName = matchedQuota.name || String(item['ชื่อพนักงาน'] || '').trim();
           const plateNum = matchedQuota.plate || String(item['ทะเบียนรถ'] || '').trim();
@@ -345,7 +341,6 @@
       const input = String(inputEl.value).trim().replace(/[^0-9]/g, '');
       if(!input) return;
 
-      // ดึงประวัติเติมน้ำมันของบัตรใบนี้จาก Transaction ขึ้นมาแสดงผลทันทีเป็นหลัก
       const matchedTxns = TXN_DATA.filter(t => String(t.card) === String(input));
       
       if(matchedTxns.length === 0 && !QUOTA_DATA[input]){
@@ -395,11 +390,12 @@
       document.getElementById('calcRound').innerText = `${(quotaInfo.m1Quota || 0).toLocaleString()} ลิตร`; 
       document.getElementById('calcTotal').innerText = `${(quotaInfo.q3Quota || 0).toLocaleString()} ลิตร`; 
 
-      const displayQuota = quotaInfo.q3Quota || 0; 
+      // ปรับปรุง: ดึงข้อมูลการประมวลผลตั้งแต่ Jan 2026 เป็นต้นไป (ไม่กรองทิ้งเฉพาะ Q3 แล้ว)
+      const all2026Txns = currentTxn.filter(t => t.year === 2026 && t.month >= 1);
+      const usedQty = all2026Txns.reduce((sum, t) => sum + t.qty, 0);
       
-      // ประมวลผลกลุ่มข้อมูล Q3 (เดือน 7, 8, 9 ปี 2026)
-      const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
-      const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
+      // ปรับปรุงการคำนวณสิทธิ์รวม (กรณีต้องการเปรียบเทียบโควต้าเป็นแบบ YTD หรือใช้โควต้าตั้งต้น)
+      const displayQuota = quotaInfo.q3Quota || 0; 
       const remainQty = displayQuota - usedQty;
 
       document.getElementById('kpiQuota').innerText = displayQuota.toLocaleString(undefined, {minimumFractionDigits: 0});
@@ -409,16 +405,16 @@
       const remainCard = document.getElementById('kpiRemainCard');
       if(remainQty < 0) {
         remainCard.className = 'kpi-card kpi-red';
-        remainCard.querySelector('.kpi-lbl').innerText = 'เติมน้ำมันเกินโควต้า (ลิตร)';
+        remainCard.querySelector('.kpi-lbl').innerText = 'เติมน้ำมันเกินโควต้าสะสม (ลิตร)';
       } else {
         remainCard.className = 'kpi-card kpi-amber';
-        remainCard.querySelector('.kpi-lbl').innerText = 'คงเหลือไตรมาสนี้ (ลิตร)';
+        remainCard.querySelector('.kpi-lbl').innerText = 'คงเหลือสิทธิ์ใช้งาน (ลิตร)';
       }
       
       let pct = displayQuota > 0 ? (usedQty / displayQuota) * 100 : 0;
       if(pct > 100) pct = 100;
       document.getElementById('kpiBar').style.width = `${pct}%`;
-      document.getElementById('kpiUsedPct').innerText = `ใช้ไปแล้ว ${pct.toFixed(1)}% ของโควต้ารวมประจำไตรมาส`;
+      document.getElementById('kpiUsedPct').innerText = `ใช้ไปแล้ว ${pct.toFixed(1)}% ของโควต้ารวมในระบบ`;
       
       renderMonthlySummary();
       renderTxnPage();
@@ -455,7 +451,6 @@
         const sumQty = mTxns.reduce((sum, t) => sum + t.qty, 0);
         const sumExcl = mTxns.reduce((sum, t) => sum + t.excl, 0);
         
-        // ค่าน้ำมันต่อลิตรเฉลี่ยรวมของเดือน (EXCLUDE_VAT_AMOUNT / QTY_LITRE)
         const avgRate = sumQty > 0 ? sumExcl / sumQty : 0;
         const labelTh = `${monthNamesTh[target.month]} ${target.year + 543}`;
         
@@ -480,7 +475,6 @@
         return;
       }
       
-      // เรียงลำดับประวัติข้อมูลจากวันที่ล่าสุดลงมาด้านล่าง
       let currentTxnsSorted = [...currentTxn].sort((a,b) => {
         const pA = a.dateStr.split('/');
         const pB = b.dateStr.split('/');
@@ -497,7 +491,6 @@
       
       let html = '';
       pageData.forEach(t => {
-        // อัตราต่อลิตรรายรายการ (EXCLUDE_VAT_AMOUNT / QTY_LITRE)
         const rate = t.qty > 0 ? (t.excl / t.qty) : 0;
         html += `<tr>
           <td>${t.dateStr}</td>
@@ -544,6 +537,7 @@
       renderTxnPage();
     }
 
+    // ฟังก์ชันดาวน์โหลดจะดึงข้อมูลชุดเดิมทั้งหมดที่มาจากมกราคม 2569 ด้วย
     function downloadXlsx(){
       if(!currentTxn.length){ alert('ไม่มีข้อมูลสำหรับดาวน์โหลด'); return; }
       const info = QUOTA_DATA[currentCard] || {};
