@@ -98,15 +98,15 @@
             <span id="calcMonths" class="text-sm font-semibold mt-1 block text-white">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">ค่าเฉลี่ยเดิม (คอลัมน์ Avg)</span>
+            <span class="text-xs text-blue-200 block">ค่าเฉลี่ยเดิม</span>
             <span id="calcAvg" class="text-lg font-bold mt-1 block text-yellow-300">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">สิทธิ์ต่อเดือน (คอลัมน์ N)</span>
+            <span class="text-xs text-blue-200 block">สิทธิ์ต่อเดือน</span>
             <span id="calcRound" class="text-lg font-bold mt-1 block text-emerald-300">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">โควต้ารายไตรมาส (คอลัมน์ O)</span>
+            <span class="text-xs text-blue-200 block">โควต้ารายไตรมาส</span>
             <span id="calcTotal" class="text-xl font-extrabold mt-1 block text-cyan-300">—</span>
           </div>
         </div>
@@ -213,7 +213,7 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        console.log('กำลังโหลดฐานข้อมูลน้ำมัน...');
+        console.log('กำลังดาวน์โหลดข้อมูลฐานข้อมูล...');
         
         const [txnRes, quotaRes] = await Promise.all([
           fetch(TRANSACTION_API_URL).then(res => res.json()),
@@ -221,11 +221,11 @@
         ]);
 
         if (!Array.isArray(txnRes) || !Array.isArray(quotaRes)) {
-          throw new Error('โครงสร้าง API ผิดพลาดหรือสิทธิ์การใช้งาน SheetDB เต็มขีดจำกัด');
+          throw new Error('โครงสร้างข้อมูลผิดพลาดหรือสิทธิ์ใช้งาน API เต็ม');
         }
 
-        // 1. แมปและทำความสะอาดข้อมูลของฝั่ง Transaction
-        TXN_DATA = txnRes.map(item => {
+        // 1. ดึงและล้างค่าจาก Transaction (เอาขึ้นมาเป็นหลัก)
+        TXN_DATA = txnRes.map((item) => {
           const qty = parseFloat(item['จำนวนลิตร'] || item['ปริมาณ'] || 0);
           const excl = parseFloat(item['ยอดรวม Excl.VAT (บาท)'] || item['ยอดรวม Excl.VAT'] || 0);
           const dateStr = String(item['วันที่'] || '').trim();
@@ -255,7 +255,7 @@
           };
         });
 
-        // 2. แมปโควต้าจากคอลัมน์ N และ คอลัมน์ O ให้ตรงตาม API ตัวใหม่เป๊ะๆ
+        // 2. แมปตาราง Quota ไว้ดึงยอดตามเลขบัตร
         quotaRes.forEach(item => {
           let rawCard = item['Fleet Card'] || item['FleetCard'] || '';
           let cleanCard = String(rawCard).replace(/[^0-9]/g, '').trim();
@@ -272,8 +272,8 @@
               mayQty: parseFloat(item['May'] || 0),                
               junQty: parseFloat(item['Jun'] || 0),                
               avgQty: parseFloat(item['Avg'] || 0),                
-              m1Quota: parseFloat(item['ลิตร1M'] || 0),   // คอลัมน์ N เป๊ะๆ
-              q3Quota: parseFloat(item['1Q'] || 0)        // คอลัมน์ O เป๊ะๆ และนำไปใช้คำนวณใน KPI สุทธิ
+              m1Quota: parseFloat(item['ลิตร1M'] || 0),   
+              q3Quota: parseFloat(item['1Q'] || 0)        
             };
           }
         });
@@ -290,7 +290,7 @@
         console.error(error);
         const errBox = document.getElementById('loginError');
         if (errBox) {
-          errBox.innerText = `❌ ข้อผิดพลาดในการดาวน์โหลดข้อมูล: ${error.message}`;
+          errBox.innerText = `❌ เกิดข้อผิดพลาด: ${error.message}`;
           errBox.style.display = 'block';
         }
       }
@@ -316,7 +316,7 @@
       });
       if (maxDateObj) {
         const monthsTh = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${maxDateObj.getDate()} ${monthsTh[maxDateObj.getMonth()]} ${maxDateObj.getFullYear() + 543} | อัปเดตข้อมูลอัตโนมัติ`;
+        displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${maxDateObj.getDate()} ${monthsTh[maxDateObj.getMonth()]} ${maxDateObj.getFullYear() + 543} | อัปเดตเรียลไทม์`;
       }
     }
 
@@ -325,20 +325,22 @@
       const errBox = document.getElementById('loginError');
       if(!inputEl || !errBox) return;
 
+      // คลีนเลขบัตรที่กรอกเข้ามาให้เป็นตัวเลขล้วนเพื่อตัดเรื่อง Format ช่องว่าง
       const input = String(inputEl.value).trim().replace(/[^0-9]/g, '');
       if(!input) return;
 
-      if(!QUOTA_DATA[input]){
-        errBox.innerText = `❌ ไม่พบหมายเลข Fleet Card (${input}) นี้ในระบบโควต้า`;
+      // ค้นหาประวัติในฐานข้อมูล Transaction เป็นหลักตามรูปภาพแนบ
+      const matchedTxns = TXN_DATA.filter(t => String(t.card) === String(input));
+      
+      if(matchedTxns.length === 0 && !QUOTA_DATA[input]){
+        errBox.innerText = `❌ ไม่พบข้อมูลธุรกรรมหรือโควต้าของ Fleet Card หมายเลขนี้`;
         errBox.style.display = 'block';
         return;
       }
       
       errBox.style.display = 'none';
       currentCard = input;
-      
-      // ฟิลเตอร์ตรวจสอบข้อมูลธุรกรรมบัตรให้เป็นรูปแบบตัวแปร String เหมือนกัน
-      currentTxn = TXN_DATA.filter(t => String(t.card) === String(currentCard));
+      currentTxn = matchedTxns; // เก็บชุดข้อมูล Transaction ของบัตรนี้ทันที
       currentPage = 1;
       
       document.getElementById('loginPage').style.display = 'none';
@@ -356,27 +358,33 @@
     }
 
     function renderDashboard(){
-      const info = QUOTA_DATA[currentCard] || {};
+      // ดึงข้อมูลพนักงาน (ถ้าไม่มีใน Quota ให้ดึงจากข้อมูลแถวแรกของ Transaction แทนเพื่อให้ระบบไม่พัง)
+      const quotaInfo = QUOTA_DATA[currentCard] || {};
+      const firstTxn = currentTxn[0] || {};
       
-      document.getElementById('empAvatar').innerText = info.name ? info.name.trim().charAt(0) : '—';
-      document.getElementById('empName').innerText = info.name || 'ไม่ทราบชื่อพนักงาน';
-      document.getElementById('empSub').innerText = `${info.company || 'TD'} · ${info.team || 'ไม่ระบุฝ่าย'} · ${info.position || 'พนักงาน'}`;
-      document.getElementById('empBadge').innerText = `ทะเบียนรถ: ${info.plate || '—'} | รหัสพนักงาน: ${info.empCode || '—'}`;
-      
-      const apr = info.aprQty || 0;
-      const may = info.mayQty || 0;
-      const jun = info.junQty || 0;
-      
-      // บล็อกข้อมูลสิทธิ์น้ำมันด้านบน
-      document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
-      document.getElementById('calcAvg').innerText = `${(info.avgQty || 0).toLocaleString()} ลิตร`;
-      document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ N (สิทธิ์ต่อเดือน)
-      document.getElementById('calcTotal').innerText = `${(info.q3Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ O (โควต้ารายไตรมาส)
+      const empName = quotaInfo.name || firstTxn.name || 'ผู้ถือบัตร Fleet Card';
+      const empCode = quotaInfo.empCode || firstTxn.empCode || '—';
+      const plateNum = quotaInfo.plate || firstTxn.plate || '—';
 
-      // โควต้าสุทธิประจำไตรมาสนี้ (ดึงมาจากคอลัมน์ O)
-      const displayQuota = info.q3Quota || 0; 
+      document.getElementById('empAvatar').innerText = empName !== '—' ? empName.trim().charAt(0) : '💳';
+      document.getElementById('empName').innerText = empName;
+      document.getElementById('empSub').innerText = `${quotaInfo.company || 'TD'} · ${quotaInfo.team || 'ฝ่ายปฏิบัติการ'} · ${quotaInfo.position || 'พนักงานขับรถ'}`;
+      document.getElementById('empBadge').innerText = `ทะเบียนรถ: ${plateNum} | รหัสพนักงาน: ${empCode}`;
       
-      // ประมวลผลรวมยอดการใช้งานจริงของ Q3 (เดือน 7, 8, 9 ปี 2026)
+      const apr = quotaInfo.aprQty || 0;
+      const may = quotaInfo.mayQty || 0;
+      const jun = quotaInfo.junQty || 0;
+      
+      // แสดงผลตัวเลขข้อมูลสิทธิ์
+      document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
+      document.getElementById('calcAvg').innerText = `${(quotaInfo.avgQty || 0).toLocaleString()} ลิตร`;
+      document.getElementById('calcRound').innerText = `${(quotaInfo.m1Quota || 0).toLocaleString()} ลิตร`; 
+      document.getElementById('calcTotal').innerText = `${(quotaInfo.q3Quota || 0).toLocaleString()} ลิตร`; 
+
+      // โควต้าสุทธิประจำไตรมาสนี้
+      const displayQuota = quotaInfo.q3Quota || 0; 
+      
+      // สรุปปริมาณน้ำมันไตรมาส 3 (ก.ค. = 7, ส.ค. = 8, ก.ย. = 9)
       const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
       const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
       const remainQty = displayQuota - usedQty;
@@ -408,7 +416,7 @@
       if(!tbody) return;
       
       if(!currentTxn.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรใบนี้ในระบบฐานข้อมูล</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่พบข้อมูลประวัติการเติมน้ำมัน</td></tr>`;
         return;
       }
 
@@ -453,11 +461,12 @@
       if(!tbody) return;
       
       if(!currentTxn.length){
-        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรใบนี้ในระบบฐานข้อมูล</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่พบรายการข้อมูลธุรกรรมของบัตรใบนี้</td></tr>`;
         document.getElementById('paginationWrap').innerHTML = '';
         return;
       }
       
+      // เรียงจากวันที่ล่าสุดลงไปตามรูปแบบปกติ
       let currentTxnsSorted = [...currentTxn].sort((a,b) => {
         const pA = a.dateStr.split('/');
         const pB = b.dateStr.split('/');
