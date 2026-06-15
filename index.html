@@ -213,25 +213,19 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        console.log('กำลังดาวน์โหลดข้อมูลและตรวจสอบโครงสร้างคอลัมน์...');
+        console.log('กำลังโหลดฐานข้อมูลน้ำมัน...');
         
         const [txnRes, quotaRes] = await Promise.all([
-          fetch(TRANSACTION_API_URL).then(res => {
-            if (!res.ok) throw new Error(`ไม่สามารถเชื่อมต่อ API Transaction ได้ (Status ${res.status})`);
-            return res.json();
-          }),
-          fetch(QUOTA_API_URL).then(res => {
-            if (!res.ok) throw new Error(`ไม่สามารถเชื่อมต่อ API Quota ได้ (Status ${res.status})`);
-            return res.json();
-          })
+          fetch(TRANSACTION_API_URL).then(res => res.json()),
+          fetch(QUOTA_API_URL).then(res => res.json())
         ]);
 
-        if (txnRes.error || quotaRes.error || !Array.isArray(txnRes) || !Array.isArray(quotaRes)) {
-          throw new Error(txnRes.error || quotaRes.error || 'โครงสร้างข้อมูลผิดพลาดหรือสิทธิ์ใช้งาน API เต็ม');
+        if (!Array.isArray(txnRes) || !Array.isArray(quotaRes)) {
+          throw new Error('โครงสร้าง API ผิดพลาดหรือสิทธิ์การใช้งาน SheetDB เต็มขีดจำกัด');
         }
 
-        // 1. ตารางชีต Transaction (ล้าง format บัตรให้ตรงกัน)
-        TXN_DATA = txnRes.map((item) => {
+        // 1. แมปและทำความสะอาดข้อมูลของฝั่ง Transaction
+        TXN_DATA = txnRes.map(item => {
           const qty = parseFloat(item['จำนวนลิตร'] || item['ปริมาณ'] || 0);
           const excl = parseFloat(item['ยอดรวม Excl.VAT (บาท)'] || item['ยอดรวม Excl.VAT'] || 0);
           const dateStr = String(item['วันที่'] || '').trim();
@@ -261,7 +255,7 @@
           };
         });
 
-        // 2. ตารางชีต Quota (จับคู่คอลัมน์ N และ คอลัมน์ O ให้ถูกต้องตามข้อมูลจริง)
+        // 2. แมปโควต้าจากคอลัมน์ N และ คอลัมน์ O ให้ตรงตาม API ตัวใหม่เป๊ะๆ
         quotaRes.forEach(item => {
           let rawCard = item['Fleet Card'] || item['FleetCard'] || '';
           let cleanCard = String(rawCard).replace(/[^0-9]/g, '').trim();
@@ -278,8 +272,8 @@
               mayQty: parseFloat(item['May'] || 0),                
               junQty: parseFloat(item['Jun'] || 0),                
               avgQty: parseFloat(item['Avg'] || 0),                
-              m1Quota: parseFloat(item['ลิตร1M'] || item['1M'] || 0),   // คอลัมน์ N: สิทธิ์ต่อเดือน 
-              q3Quota: parseFloat(item['1Q'] || item['Q3'] || 0)       // คอลัมน์ O: โควต้ารายไตรมาส (ใช้แสดงใน KPI สุทธิด้วย)
+              m1Quota: parseFloat(item['ลิตร1M'] || 0),   // คอลัมน์ N เป๊ะๆ
+              q3Quota: parseFloat(item['1Q'] || 0)        // คอลัมน์ O เป๊ะๆ และนำไปใช้คำนวณใน KPI สุทธิ
             };
           }
         });
@@ -288,7 +282,7 @@
 
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) {
-          loginBtn.innerText = 'เข้าดูข้อมูล →';
+          loginBtn.innerText = 'เข้าสู่ระบบแดชบอร์ด →';
           loginBtn.disabled = false;
         }
 
@@ -296,7 +290,7 @@
         console.error(error);
         const errBox = document.getElementById('loginError');
         if (errBox) {
-          errBox.innerText = `❌ เกิดข้อผิดพลาด: ${error.message}`;
+          errBox.innerText = `❌ ข้อผิดพลาดในการดาวน์โหลดข้อมูล: ${error.message}`;
           errBox.style.display = 'block';
         }
       }
@@ -322,7 +316,7 @@
       });
       if (maxDateObj) {
         const monthsTh = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${maxDateObj.getDate()} ${monthsTh[maxDateObj.getMonth()]} ${maxDateObj.getFullYear() + 543} | อัปเดตเรียลไทม์`;
+        displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${maxDateObj.getDate()} ${monthsTh[maxDateObj.getMonth()]} ${maxDateObj.getFullYear() + 543} | อัปเดตข้อมูลอัตโนมัติ`;
       }
     }
 
@@ -335,7 +329,7 @@
       if(!input) return;
 
       if(!QUOTA_DATA[input]){
-        errBox.innerText = `❌ ไม่พบหมายเลข Fleet Card (${input}) นี้ในระบบ`;
+        errBox.innerText = `❌ ไม่พบหมายเลข Fleet Card (${input}) นี้ในระบบโควต้า`;
         errBox.style.display = 'block';
         return;
       }
@@ -343,8 +337,8 @@
       errBox.style.display = 'none';
       currentCard = input;
       
-      // ฟิลเตอร์หา Transaction ที่ผูกกับหมายเลขบัตรใบนี้
-      currentTxn = TXN_DATA.filter(t => t.card === currentCard);
+      // ฟิลเตอร์ตรวจสอบข้อมูลธุรกรรมบัตรให้เป็นรูปแบบตัวแปร String เหมือนกัน
+      currentTxn = TXN_DATA.filter(t => String(t.card) === String(currentCard));
       currentPage = 1;
       
       document.getElementById('loginPage').style.display = 'none';
@@ -365,7 +359,7 @@
       const info = QUOTA_DATA[currentCard] || {};
       
       document.getElementById('empAvatar').innerText = info.name ? info.name.trim().charAt(0) : '—';
-      document.getElementById('empName').innerText = info.name || 'ไม่ทราบชื่อ';
+      document.getElementById('empName').innerText = info.name || 'ไม่ทราบชื่อพนักงาน';
       document.getElementById('empSub').innerText = `${info.company || 'TD'} · ${info.team || 'ไม่ระบุฝ่าย'} · ${info.position || 'พนักงาน'}`;
       document.getElementById('empBadge').innerText = `ทะเบียนรถ: ${info.plate || '—'} | รหัสพนักงาน: ${info.empCode || '—'}`;
       
@@ -373,16 +367,16 @@
       const may = info.mayQty || 0;
       const jun = info.junQty || 0;
       
-      // แสดงผลข้อมูลสิทธิ์ในแถบน้ำเงินด้านบน
+      // บล็อกข้อมูลสิทธิ์น้ำมันด้านบน
       document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
       document.getElementById('calcAvg').innerText = `${(info.avgQty || 0).toLocaleString()} ลิตร`;
-      document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; // ดึงจากคอลัมน์ N 
-      document.getElementById('calcTotal').innerText = `${(info.q3Quota || 0).toLocaleString()} ลิตร`; // ดึงจากคอลัมน์ O
+      document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ N (สิทธิ์ต่อเดือน)
+      document.getElementById('calcTotal').innerText = `${(info.q3Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ O (โควต้ารายไตรมาส)
 
-      // โควต้าสุทธิประจำไตรมาสนี้ ดึงมาจากคอลัมน์ O เป๊ะๆ
+      // โควต้าสุทธิประจำไตรมาสนี้ (ดึงมาจากคอลัมน์ O)
       const displayQuota = info.q3Quota || 0; 
       
-      // คำนวณยอดเติมจริงสะสมของไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
+      // ประมวลผลรวมยอดการใช้งานจริงของ Q3 (เดือน 7, 8, 9 ปี 2026)
       const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
       const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
       const remainQty = displayQuota - usedQty;
@@ -403,7 +397,7 @@
       let pct = displayQuota > 0 ? (usedQty / displayQuota) * 100 : 0;
       if(pct > 100) pct = 100;
       document.getElementById('kpiBar').style.width = `${pct}%`;
-      document.getElementById('kpiUsedPct').innerText = `ใช้ไปแล้ว ${pct.toFixed(1)}% ของโควต้ารวมไตรมาส`;
+      document.getElementById('kpiUsedPct').innerText = `ใช้ไปแล้ว ${pct.toFixed(1)}% ของโควต้ารวมประจำไตรมาส`;
       
       renderMonthlySummary();
       renderTxnPage();
@@ -414,7 +408,7 @@
       if(!tbody) return;
       
       if(!currentTxn.length) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่มีข้อมูลธุรกรรมของบัตรใบนี้</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรใบนี้ในระบบฐานข้อมูล</td></tr>`;
         return;
       }
 
@@ -431,8 +425,8 @@
       });
 
       let sortedKeys = Object.keys(monthMap).sort();
-      
       let html = '';
+      
       sortedKeys.forEach(key => {
         const target = monthMap[key];
         const mTxns = currentTxn.filter(t => t.month === target.month && t.year === target.year);
@@ -459,7 +453,7 @@
       if(!tbody) return;
       
       if(!currentTxn.length){
-        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่มีข้อมูลธุรกรรมของบัตรใบนี้</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรใบนี้ในระบบฐานข้อมูล</td></tr>`;
         document.getElementById('paginationWrap').innerHTML = '';
         return;
       }
