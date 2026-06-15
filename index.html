@@ -21,14 +21,14 @@
     .kpi-amber { border-left: 5px solid #d97706; }
     .kpi-red { border-left: 5px solid #dc2626; background-color: #fef2f2; }
     
-    /* สไตล์ตามรูปแบบ Section ที่ส่งมา */
+    /* สไตล์ตามรูปแบบ Section */
     .section { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 24px; padding: 20px; }
     .section-head { display: flex; align-items: center; justify-content: space-between; border-b: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 16px; gap: 12px; }
     .section-head-left { display: flex; align-items: center; gap: 10px; }
     .section-head-left svg { width: 20px; height: 20px; fill: none; stroke: #475569; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .section-head-left h3 { font-size: 16px; font-weight: 700; color: #1e293b; }
     
-    /* ปุ่มดาวน์โหลดสไตล์ SVG */
+    /* ปุ่มดาวน์โหลด */
     .btn-dl { display: flex; align-items: center; gap: 8px; background-color: #059669; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
     .btn-dl:hover { background-color: #047857; }
     .btn-dl svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -41,7 +41,7 @@
     tr:hover td { background-color: #f8fafc; }
     td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     
-    .pagination { display: flex; flex-direction: flex-row; align-items: center; justify-content: space-between; gap: 16px; pt: 16px; border-top: 1px solid #f1f5f9; margin-top: 16px; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; margin-top: 16px; }
     .pg-btn { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; cursor: pointer; transition: all 0.2s; }
     .pg-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
     .pg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -138,9 +138,9 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div class="space-y-6">
         
-        <div class="section lg:col-span-1">
+        <div class="section">
           <div class="section-head">
             <div class="section-head-left">
               <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
@@ -164,7 +164,7 @@
           </div>
         </div>
 
-        <div class="section lg:col-span-2">
+        <div class="section">
           <div class="section-head">
             <div class="section-head-left">
               <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
@@ -204,7 +204,7 @@
 
   <script>
     const TRANSACTION_API_URL = 'https://sheetdb.io/api/v1/ylnr70cqlor3c'; 
-    const QUOTA_API_URL = 'https://sheetdb.io/api/v1/sa9f45pjgu4k3?sheet=Quota'; 
+    const QUOTA_API_URL = 'https://sheetdb.io/api/v1/xt4yw5woqnawa'; // อัปเดตลิงก์ใหม่ของคุณเรียบร้อยแล้วครับ
 
     let TXN_DATA = [];
     let QUOTA_DATA = {};
@@ -373,7 +373,7 @@
       const may = info.mayQty || 0;
       const jun = info.junQty || 0;
       
-      // ดึงค่าจากคอลัมน์ N และ O แสดงบนหน้าบล็อกคำนวณด้านบน
+      // ดึงค่าแสดงในกล่องสีน้ำเงินด้านบน
       document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
       document.getElementById('calcAvg').innerText = `${(info.avgQty || 0).toLocaleString()} ลิตร`;
       document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ N
@@ -382,7 +382,7 @@
       // โควต้าสุทธิอิงตาม คอลัมน์ O เป๊ะ ๆ
       const displayQuota = info.q3Quota || 0; 
       
-      // ดึงรายการใช้จริงในไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
+      // คำนวณปริมาณที่ใช้สะสมจริงใน ไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
       const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
       const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
       const remainQty = displayQuota - usedQty;
@@ -409,36 +409,53 @@
       renderTxnPage();
     }
 
+    // ฟังก์ชันสรุปยอดแบบ Dynamic ค้นหาและคำนวณครบทุกเดือนที่มีข้อมูลในฐานข้อมูลจริง
     function renderMonthlySummary(){
       const tbody = document.getElementById('monthBody');
       if(!tbody) return;
       
-      const targetMonths = [
-        { label: 'เมษายน 2569', m: 4, y: 2026 },
-        { label: 'พฤษภาคม 2569', m: 5, y: 2026 },
-        { label: 'มิถุนายน 2569', m: 6, y: 2026 }
-      ];
+      if(!currentTxn.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>`;
+        return;
+      }
+
+      // ใช้แผนผังชื่อเดือนภาษาไทย
+      const monthNamesTh = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+      
+      // ดึงคู่กลุ่ม เดือน/ปี ที่มีธุรกรรมจริงทั้งหมดออกมา
+      let monthMap = {};
+      currentTxn.forEach(t => {
+        if(t.month && t.year) {
+          const key = `${t.year}-${String(t.month).padStart(2,'0')}`;
+          if(!monthMap[key]) {
+            monthMap[key] = { month: t.month, year: t.year };
+          }
+        }
+      });
+
+      // จัดเรียงเดือนตามเวลาเก่าไปใหม่
+      let sortedKeys = Object.keys(monthMap).sort();
       
       let html = '';
-      let hasData = false;
-      
-      targetMonths.forEach(item => {
-        const mTxns = currentTxn.filter(t => t.month === item.m && t.year === item.y);
+      sortedKeys.forEach(key => {
+        const target = monthMap[key];
+        const mTxns = currentTxn.filter(t => t.month === target.month && t.year === target.year);
+        
         const sumQty = mTxns.reduce((sum, t) => sum + t.qty, 0);
         const sumExcl = mTxns.reduce((sum, t) => sum + t.excl, 0);
         const avgRate = sumQty > 0 ? sumExcl / sumQty : 0;
         
-        if(mTxns.length > 0) hasData = true;
+        const labelTh = `${monthNamesTh[target.month]} ${target.year + 543}`;
         
         html += `<tr>
-          <td>${item.label}</td>
+          <td>${labelTh}</td>
           <td class="num">${sumQty.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
           <td class="num">${avgRate > 0 ? avgRate.toFixed(2) : '0.00'}</td>
           <td class="num">${sumExcl.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
         </tr>`;
       });
       
-      tbody.innerHTML = hasData ? html : `<tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>`;
+      tbody.innerHTML = html;
     }
 
     function renderTxnPage(){
@@ -497,7 +514,7 @@
         if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
           pgHtml += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
-          pgHtml += `<span class="text-slate-400px-1">...</span>`;
+          pgHtml += `<span class="text-slate-400 px-1">...</span>`;
         }
       }
       
