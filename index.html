@@ -21,13 +21,27 @@
     .kpi-amber { border-left: 5px solid #d97706; }
     .kpi-red { border-left: 5px solid #dc2626; background-color: #fef2f2; }
     
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
-    th { background-color: #f8fafc; color: #475569; font-weight: 600; font-size: 13.5px; padding: 14px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-    td { padding: 14px 16px; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    /* สไตล์ตามรูปแบบ Section ที่ส่งมา */
+    .section { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 24px; padding: 20px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; border-b: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 16px; gap: 12px; }
+    .section-head-left { display: flex; align-items: center; gap: 10px; }
+    .section-head-left svg { width: 20px; height: 20px; fill: none; stroke: #475569; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .section-head-left h3 { font-size: 16px; font-weight: 700; color: #1e293b; }
+    
+    /* ปุ่มดาวน์โหลดสไตล์ SVG */
+    .btn-dl { display: flex; align-items: center; gap: 8px; background-color: #059669; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-dl:hover { background-color: #047857; }
+    .btn-dl svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .ovf { overflow-x: auto; width: 100%; }
+    table { width: 100%; border-collapse: collapse; min-width: 100%; }
+    th { background-color: #f8fafc; color: #475569; font-weight: 600; font-size: 13.5px; padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    td { padding: 12px 14px; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background-color: #f8fafc; }
     td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     
+    .pagination { display: flex; flex-direction: flex-row; align-items: center; justify-content: space-between; gap: 16px; pt: 16px; border-top: 1px solid #f1f5f9; margin-top: 16px; }
     .pg-btn { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; cursor: pointer; transition: all 0.2s; }
     .pg-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
     .pg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -79,26 +93,25 @@
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
       
       <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white p-6 rounded-2xl shadow-lg border border-blue-950">
-        <h3 class="font-bold text-base text-blue-200 mb-4 flex items-center gap-2">📊 สูตรการประมวลผลฐานโควต้าสะสม ไตรมาส 3</h3>
+        <h3 class="font-bold text-base text-blue-200 mb-4 flex items-center gap-2">📊 ข้อมูลสิทธิ์ประมวลผลโควต้าน้ำมัน ประจำไตรมาส 3</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
             <span class="text-xs text-blue-200 block">ยอดเติมจริงย้อนหลัง Q2</span>
             <span id="calcMonths" class="text-sm font-semibold mt-1 block text-white">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">ค่าเฉลี่ยเติมจริง (คอลัมน์ Avg)</span>
+            <span class="text-xs text-blue-200 block">ค่าเฉลี่ยเดิม (คอลัมน์ Avg)</span>
             <span id="calcAvg" class="text-lg font-bold mt-1 block text-yellow-300">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">สิทธิ์ต่อเดือน (บวก 10% ปัดลง 25)</span>
+            <span class="text-xs text-blue-200 block">สิทธิ์ต่อเดือน (คอลัมน์ N)</span>
             <span id="calcRound" class="text-lg font-bold mt-1 block text-emerald-300">—</span>
           </div>
           <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-            <span class="text-xs text-blue-200 block">ประมาณการโควต้ารวมทั้งไตรมาส</span>
+            <span class="text-xs text-blue-200 block">โควต้ารายไตรมาส (คอลัมน์ O)</span>
             <span id="calcTotal" class="text-xl font-extrabold mt-1 block text-cyan-300">—</span>
           </div>
         </div>
-        <p class="text-[11.5px] text-blue-300/80 mt-3 italic">*หมายเหตุ: ระบบจะเลือกใช้ยอดโควต้าคงที่จากคอลัมน์ 'ลิตร1M' ก่อนเป็นอันดับแรก หากไม่พบตัวเลข จึงจะหันมาใช้ยอดประมาณการไตรมาสจากสูตรปัดเศษด้านบนนี้</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -127,60 +140,62 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-1">
-          <div class="px-5 py-4 bg-slate-50 border-b border-slate-200">
-            <h4 class="font-bold text-slate-700 text-sm">📈 สรุปยอดใช้งานจริงไตรมาส 2</h4>
+        <div class="section lg:col-span-1">
+          <div class="section-head">
+            <div class="section-head-left">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+              <h3>สรุปรายเดือน (ปี 2569)</h3>
+            </div>
           </div>
-          <div class="overflow-x-auto">
+          <div class="ovf">
             <table>
               <thead>
                 <tr>
-                  <th>เดือน/รอบ</th>
-                  <th class="num">เติมจริง (ลิตร)</th>
-                  <th class="num">เฉลี่ย (บาท/ลิตร)</th>
-                  <th class="num">รวม Excl.VAT</th>
+                  <th>เดือน</th>
+                  <th class="num">จำนวนลิตร</th>
+                  <th class="num">อัตราเฉลี่ย (บ./ล.)</th>
+                  <th class="num">ยอดรวม Excl.VAT (บาท)</th>
                 </tr>
               </thead>
               <tbody id="monthBody">
-                <tr><td colspan="4" class="empty">กำลังโหลดข้อมูล...</td></tr>
+                <tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden lg:col-span-2 space-y-4 p-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div>
-              <h4 class="font-bold text-slate-700 text-base">⛽ ประวัติการเติมน้ำมันอย่างละเอียด</h4>
-              <p class="text-xs text-slate-400 mt-0.5">แสดงรายการธุรกรรมทั้งหมดที่เกิดขึ้นผ่านบัตรใบนี้</p>
+        <div class="section lg:col-span-2">
+          <div class="section-head">
+            <div class="section-head-left">
+              <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+              <h3>รายการเติมน้ำมันทั้งหมด</h3>
             </div>
-            <button onclick="downloadXlsx()" class="self-start sm:self-auto bg-emerald-600 text-white font-medium px-4 py-2 rounded-xl text-xs hover:bg-emerald-700 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-              📥 ดาวน์โหลดเป็น Excel (.xlsx)
+            <button class="btn-dl" onclick="downloadXlsx()">
+              <svg viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+              ดาวน์โหลด xlsx
             </button>
           </div>
-
-          <div class="overflow-x-auto">
-            <table class="min-w-[800px]">
+          <div class="ovf">
+            <table>
               <thead>
                 <tr>
-                  <th>วันที่ทำรายการ</th>
-                  <th>เลขบัตรการ์ด</th>
+                  <th>วันที่</th>
+                  <th>Fleet Card</th>
                   <th>รหัสพนักงาน</th>
                   <th>ชื่อพนักงาน</th>
                   <th>ทะเบียนรถ</th>
                   <th>ประเภทน้ำมัน</th>
                   <th class="num">จำนวนลิตร</th>
-                  <th class="num">บาท/ลิตร</th>
-                  <th class="num">รวม Excl.VAT</th>
+                  <th class="num">อัตรา (บ./ล.)</th>
+                  <th class="num">Excl.VAT (บาท)</th>
                 </tr>
               </thead>
               <tbody id="txnBody">
-                <tr><td colspan="9" class="empty">กำลังประมวลผลข้อมูลธุรกรรมพนักงาน...</td></tr>
+                <tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>
               </tbody>
             </table>
           </div>
-
-          <div id="paginationWrap" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-100"></div>
+          <div class="pagination" id="paginationWrap"></div>
         </div>
 
       </div>
@@ -188,11 +203,8 @@
   </div>
 
   <script>
-    // ==========================================
-    // 🚨 จุดสำคัญ: ผูกลิงก์ API สดจาก SheetDB ของคุณตรงนี้
-    // ==========================================
     const TRANSACTION_API_URL = 'https://sheetdb.io/api/v1/ylnr70cqlor3c'; 
-    const QUOTA_API_URL = 'https://sheetdb.io/api/v1/xt4yw5woqnawa'; // สามารถนำรหัสตัวใหม่มาวางตรงนี้ได้เลยครับ
+    const QUOTA_API_URL = 'https://sheetdb.io/api/v1/sa9f45pjgu4k3?sheet=Quota'; 
 
     let TXN_DATA = [];
     let QUOTA_DATA = {};
@@ -201,10 +213,9 @@
     let currentPage = 1;
     const PAGE_SIZE = 15;
 
-    // เริ่มรันระบบดึงข้อมูลจาก API พร้อมกันทันทีเมื่อเปิดเว็บบราวเซอร์
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        console.log('กำลังดาวน์โหลดข้อมูลและจับคู่คอลัมน์ตามโครงสร้างชีตพนักงาน A-O...');
+        console.log('กำลังดาวน์โหลดข้อมูลและจับคู่คอลัมน์...');
         
         const [txnRes, quotaRes] = await Promise.all([
           fetch(TRANSACTION_API_URL).then(res => {
@@ -221,9 +232,7 @@
           throw new Error(txnRes.error || quotaRes.error || 'โครงสร้างข้อมูลผิดพลาดหรือสิทธิ์ใช้งาน API เต็ม');
         }
 
-        console.log('ดาวน์โหลดข้อมูลจากต้นทางสำเร็จ! กำลังแมตช์เข้าโครงสร้างระบบ...');
-
-        // 1. แปลงและจัดเตรียมโครงสร้างชีตตาราง Transaction (ประวัติการเติม)
+        // 1. ตารางชีต Transaction
         TXN_DATA = txnRes.map((item) => {
           const qty = parseFloat(item['จำนวนลิตร'] || item['ปริมาณ'] || 0);
           const excl = parseFloat(item['ยอดรวม Excl.VAT (บาท)'] || item['ยอดรวม Excl.VAT'] || 0);
@@ -254,38 +263,31 @@
           };
         });
 
-        // 2. แปลงและจัดโครงสร้างชีตตาราง Quota (คอลัมน์ B, C, E, F, G, H, I, J, K, L, N, O)
+        // 2. ตารางชีต Quota (คอลัมน์ B, C, E, F, G, H, I, J, K, L, N, O)
         quotaRes.forEach(item => {
-          // คอลัมน์ G: Fleet Card (ล้างอักขระพิเศษออกให้เหลือตัวเลขดิบเพื่อการ Match ที่แม่นยำ)
           let rawCard = item['Fleet Card'] || '';
           let cleanCard = String(rawCard).replace(/[^0-9]/g, '').trim();
           
           if (cleanCard) {
             QUOTA_DATA[cleanCard] = {
-              empCode: String(item['Employee Code'] || '').trim(), // คอลัมน์ B
-              name: String(item['Name'] || '').trim(),             // คอลัมน์ C
-              company: String(item['Company'] || 'TD').trim(),     // คอลัมน์ A
-              team: String(item['Team'] || '').trim(),             // คอลัมน์ E
-              position: String(item['Position'] || '').trim(),     // คอลัมน์ F
-              plate: String(item['Plate'] || '').trim(),           // คอลัมน์ H
-              
-              // ยอดลิตรรายเดือนและสิทธิ์โควต้าดึงตรงตามหัวข้ออังกฤษจริงในชีตพนักงาน
-              aprQty: parseFloat(item['Apr'] || 0),                // คอลัมน์ I
-              mayQty: parseFloat(item['May'] || 0),                // คอลัมน์ J
-              junQty: parseFloat(item['Jun'] || 0),                // คอลัมน์ K
-              avgQty: parseFloat(item['Avg'] || 0),                // คอลัมน์ L
-              q1Quota: parseFloat(item['1Q'] || 0),                // คอลัมน์ N
-              m1Quota: parseFloat(item['ลิตร1M'] || 0)               // คอลัมน์ O
+              empCode: String(item['Employee Code'] || '').trim(), 
+              name: String(item['Name'] || '').trim(),             
+              company: String(item['Company'] || 'TD').trim(),     
+              team: String(item['Team'] || '').trim(),             
+              position: String(item['Position'] || '').trim(),     
+              plate: String(item['Plate'] || '').trim(),           
+              aprQty: parseFloat(item['Apr'] || 0),                
+              mayQty: parseFloat(item['May'] || 0),                
+              junQty: parseFloat(item['Jun'] || 0),                
+              avgQty: parseFloat(item['Avg'] || 0),                
+              m1Quota: parseFloat(item['1Q'] || 0),               // คอลัมน์ N (สิทธิ์ต่อเดือน)
+              q3Quota: parseFloat(item['ลิตร1M'] || 0)              // คอลัมน์ O (โควต้ารายไตรมาส)
             };
           }
         });
 
-        console.log('ระบบผูกฐานข้อมูลสำเร็จ! รายชื่อหมายเลข Fleet Card ที่พร้อมใช้งาน:', Object.keys(QUOTA_DATA));
-
-        // ค้นหาวันโพสต์ข้อมูลล่าสุดในคลังคลัง
         calculateGlobalMaxDate();
 
-        // เปิดให้กดปุ่มล็อกอินได้ตามปกติ
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) {
           loginBtn.innerText = 'เข้าดูข้อมูล →';
@@ -293,25 +295,22 @@
         }
 
       } catch (error) {
-        console.error('Initial loading error:', error);
+        console.error(error);
         const errBox = document.getElementById('loginError');
         if (errBox) {
-          errBox.innerText = `❌ เกิดข้อผิดพลาดในการโหลดคอลัมน์ชีต: ${error.message}`;
+          errBox.innerText = `❌ เกิดข้อผิดพลาด: ${error.message}`;
           errBox.style.display = 'block';
         }
       }
     });
 
-    // ฟังก์ชันประมวลผลวันล่าสุดของรายการคลัง (Max Date)
     function calculateGlobalMaxDate() {
       const displayEl = document.getElementById('globalMaxDateDisplay');
       if (!displayEl) return;
-
       if (!TXN_DATA.length) {
-        displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ — | ไม่พบรายการธุรกรรม";
+        displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ —";
         return;
       }
-      
       let maxDateObj = null;
       TXN_DATA.forEach(t => {
         if (!t.dateStr) return;
@@ -319,37 +318,26 @@
         if (parts.length === 3) {
           const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
           if (!isNaN(d.getTime())) {
-            if (!maxDateObj || d > maxDateObj) {
-              maxDateObj = d;
-            }
+            if (!maxDateObj || d > maxDateObj) maxDateObj = d;
           }
         }
       });
-
       if (maxDateObj) {
         const monthsTh = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        const day = maxDateObj.getDate();
-        const monthStr = monthsTh[maxDateObj.getMonth()];
-        const yearTh = maxDateObj.getFullYear() + 543;
-        
-        displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${day} ${monthStr} ${yearTh} | อัปเดตเรียลไทม์`;
-      } else {
-        displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ —";
+        displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${maxDateObj.getDate()} ${monthsTh[maxDateObj.getMonth()]} ${maxDateObj.getFullYear() + 543} | อัปเดตเรียลไทม์`;
       }
     }
 
-    // ฟังก์ชันสำหรับการตรวจสอบสิทธิ์การเข้าสู่ระบบ
     function doLogin(){
       const inputEl = document.getElementById('cardInput');
       const errBox = document.getElementById('loginError');
       if(!inputEl || !errBox) return;
 
-      // ล้างอักขระเว้นวรรคตอนกรอกหน้าเว็บออกอัตโนมัติ
       const input = String(inputEl.value).trim().replace(/[^0-9]/g, '');
       if(!input) return;
 
       if(!QUOTA_DATA[input]){
-        errBox.innerText = `❌ ไม่พบหมายเลข Fleet Card (${input}) นี้ในระบบ กรุณาตรวจสอบอีกครั้ง`;
+        errBox.innerText = `❌ ไม่พบหมายเลข Fleet Card (${input}) นี้ในระบบ`;
         errBox.style.display = 'block';
         return;
       }
@@ -365,57 +353,44 @@
       renderDashboard();
     }
 
-    // ฟังก์ชันออกจากระบบกลับหน้าล็อกอิน
     function doLogout(){
       currentCard = '';
       currentTxn = [];
-      const inputEl = document.getElementById('cardInput');
-      if(inputEl) inputEl.value = '';
+      if(document.getElementById('cardInput')) document.getElementById('cardInput').value = '';
       document.getElementById('dashPage').style.display = 'none';
       document.getElementById('loginPage').style.display = 'flex';
     }
 
-    // ฟังก์ชันคำนวณสูตรและแสดงผลข้อมูลบนแดชบอร์ดหลัก
     function renderDashboard(){
       const info = QUOTA_DATA[currentCard] || {};
       
-      // แสดงผลโปรไฟล์ส่วนพนักงาน
       document.getElementById('empAvatar').innerText = info.name ? info.name.trim().charAt(0) : '—';
       document.getElementById('empName').innerText = info.name || 'ไม่ทราบชื่อ';
       document.getElementById('empSub').innerText = `${info.company || 'TD'} · ${info.team || 'ไม่ระบุฝ่าย'} · ${info.position || 'พนักงาน'}`;
       document.getElementById('empBadge').innerText = `ทะเบียนรถ: ${info.plate || '—'} | รหัสพนักงาน: ${info.empCode || '—'}`;
       
-      // ดึงตัวเลขจริงจากรายเดือนของพนักงาน
       const apr = info.aprQty || 0;
       const may = info.mayQty || 0;
       const jun = info.junQty || 0;
       
-      // ใช้ค่า Avg คอลัมน์ L หากในชีตคำนวณมาให้แล้ว หากไม่มีให้ใช้สูตรคำนวณสด
-      const avg = info.avgQty > 0 ? info.avgQty : ((apr + may + jun) / 3);
-      const plusTenPercent = avg * 1.1;
-      const roundDown25 = Math.floor(plusTenPercent / 25) * 25;
-      const computedTotalQuota = roundDown25 * 3;
-
-      // แสดงผลตัวเลขในกล่องสูตรสีน้ำเงินด้านบน
+      // ดึงค่าจากคอลัมน์ N และ O แสดงบนหน้าบล็อกคำนวณด้านบน
       document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
-      document.getElementById('calcAvg').innerText = `${avg.toFixed(2)} ลิตร`;
-      document.getElementById('calcRound').innerText = `${roundDown25.toLocaleString()} ลิตร (บวก10%=${plusTenPercent.toFixed(1)})`;
-      document.getElementById('calcTotal').innerText = `${computedTotalQuota.toLocaleString()} ลิตร`;
+      document.getElementById('calcAvg').innerText = `${(info.avgQty || 0).toLocaleString()} ลิตร`;
+      document.getElementById('calcRound').innerText = `${(info.m1Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ N
+      document.getElementById('calcTotal').innerText = `${(info.q3Quota || 0).toLocaleString()} ลิตร`; // คอลัมน์ O
 
-      // ลำดับการเลือกสิทธิ์โควต้า: ถ้าช่อง 'ลิตร1M' (O) มีตัวเลขมากกว่า 0 ให้ดึงค่านั้นไปใช้ทันที ถ้าไม่มีค่อยอิงตามสูตรไตรมาสสะสม
-      const displayQuota = info.m1Quota > 0 ? info.m1Quota : computedTotalQuota;
+      // โควต้าสุทธิอิงตาม คอลัมน์ O เป๊ะ ๆ
+      const displayQuota = info.q3Quota || 0; 
       
-      // ประมวลผลดึงยอดธุรกรรมจริงไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
+      // ดึงรายการใช้จริงในไตรมาส 3 (เดือน 7, 8, 9 ปี 2026)
       const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
       const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
       const remainQty = displayQuota - usedQty;
 
-      // ดันค่าขึ้นแสดงผลบนฟรอนต์เอนด์
       document.getElementById('kpiQuota').innerText = displayQuota.toLocaleString(undefined, {minimumFractionDigits: 0});
       document.getElementById('kpiUsed').innerText = usedQty.toLocaleString(undefined, {minimumFractionDigits: 2});
       document.getElementById('kpiRemain').innerText = remainQty.toLocaleString(undefined, {minimumFractionDigits: 2});
       
-      // การตรวจสอบและควบคุมสไตล์แจ้งเตือนถังน้ำมันเกินโควต้า
       const remainCard = document.getElementById('kpiRemainCard');
       if(remainQty < 0) {
         remainCard.className = 'kpi-card kpi-red';
@@ -425,7 +400,6 @@
         remainCard.querySelector('.kpi-lbl').innerText = 'คงเหลือไตรมาสนี้';
       }
       
-      // คำนวณความยาวเปอร์เซ็นต์แถบ progress bar 
       let pct = displayQuota > 0 ? (usedQty / displayQuota) * 100 : 0;
       if(pct > 100) pct = 100;
       document.getElementById('kpiBar').style.width = `${pct}%`;
@@ -435,16 +409,14 @@
       renderTxnPage();
     }
 
-    // ฟังก์ชันสรุปข้อมูลการเติมน้ำมันจริงเปรียบเทียบในอดีต Q2
     function renderMonthlySummary(){
-      const info = QUOTA_DATA[currentCard] || {};
       const tbody = document.getElementById('monthBody');
       if(!tbody) return;
       
       const targetMonths = [
-        { label: 'เมษายน 2569', m: 4, y: 2026, qQuota: info.aprQty || 0 },
-        { label: 'พฤษภาคม 2569', m: 5, y: 2026, qQuota: info.mayQty || 0 },
-        { label: 'มิถุนายน 2569', m: 6, y: 2026, qQuota: info.junQty || 0 }
+        { label: 'เมษายน 2569', m: 4, y: 2026 },
+        { label: 'พฤษภาคม 2569', m: 5, y: 2026 },
+        { label: 'มิถุนายน 2569', m: 6, y: 2026 }
       ];
       
       let html = '';
@@ -456,37 +428,33 @@
         const sumExcl = mTxns.reduce((sum, t) => sum + t.excl, 0);
         const avgRate = sumQty > 0 ? sumExcl / sumQty : 0;
         
-        if(mTxns.length > 0 || item.qQuota > 0) hasData = true;
+        if(mTxns.length > 0) hasData = true;
         
         html += `<tr>
-          <td>${item.label} ${item.qQuota > 0 ? `<span style="font-size:11px;color:#185fa5;background:#eef4f8;padding:2px 6px;border-radius:10px;margin-left:6px">โควต้า: ${item.qQuota}</span>` : ''}</td>
+          <td>${item.label}</td>
           <td class="num">${sumQty.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
           <td class="num">${avgRate > 0 ? avgRate.toFixed(2) : '0.00'}</td>
           <td class="num">${sumExcl.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
         </tr>`;
       });
       
-      tbody.innerHTML = hasData ? html : `<tr><td colspan="4" class="empty">ไม่มีประวัติประมวลผลในช่วงเวลาดังกล่าว</td></tr>`;
+      tbody.innerHTML = hasData ? html : `<tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>`;
     }
 
-    // ฟังก์ชันเรนเดอร์และจัดตารางประวัติธุรกรรมแบบแยกพนักงาน (ทำระบบ Pagination)
     function renderTxnPage(){
       const tbody = document.getElementById('txnBody');
       if(!tbody) return;
       
       if(!currentTxn.length){
-        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรนี้ในระบบฐานข้อมูลคลังคลัง</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>`;
         document.getElementById('paginationWrap').innerHTML = '';
         return;
       }
       
-      // เรียงจากข้อมูลวันที่ใหม่ล่าสุดขึ้นก่อน
       let currentTxnsSorted = [...currentTxn].sort((a,b) => {
         const pA = a.dateStr.split('/');
         const pB = b.dateStr.split('/');
-        const dA = new Date(pA[2], pA[1]-1, pA[0]);
-        const dB = new Date(pB[2], pB[1]-1, pB[0]);
-        return dB - dA;
+        return new Date(pB[2], pB[1]-1, pB[0]) - new Date(pA[2], pA[1]-1, pA[0]);
       });
       
       const totalRows = currentTxnsSorted.length;
@@ -506,7 +474,7 @@
           <td>${t.empCode}</td>
           <td>${t.name}</td>
           <td>${t.plate}</td>
-          <td><span style="font-size:11.5px;background:#f0f0ee;padding:3px 8px;border-radius:6px;font-weight:500">${t.product}</span></td>
+          <td>${t.product}</td>
           <td class="num">${t.qty.toFixed(2)}</td>
           <td class="num">${rate.toFixed(2)}</td>
           <td class="num">${t.excl.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
@@ -517,7 +485,6 @@
       renderPaginationControls(totalPages, totalRows, startIdx, endIdx);
     }
 
-    // ฟังก์ชันสร้างปุ่มเปลี่ยนหน้าควบคุมตาราง (Pagination)
     function renderPaginationControls(totalPages, totalRows, startIdx, endIdx){
       const pgWrap = document.getElementById('paginationWrap');
       if(!pgWrap) return;
@@ -526,12 +493,12 @@
       pgHtml += `<div class="flex items-center gap-1.5">`;
       pgHtml += `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ ก่อนหน้า</button>`;
       
-      let startP = Math.max(1, currentPage - 2);
-      let endP = Math.min(totalPages, startP + 4);
-      if(endP - startP < 4) startP = Math.max(1, endP - 4);
-      
-      for(let i=startP; i<=endP; i++){
-        pgHtml += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+      for(let i=1; i<=totalPages; i++){
+        if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          pgHtml += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          pgHtml += `<span class="text-slate-400px-1">...</span>`;
+        }
       }
       
       pgHtml += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>ถัดไป ›</button>`;
@@ -546,13 +513,10 @@
       renderTxnPage();
     }
 
-    // ฟังก์ชันดาวน์โหลดรายงานธุรกรรมน้ำมันของพนักงานคนนั้นออกเป็นไฟล์ Excel (.xlsx)
     function downloadXlsx(){
       if(!currentTxn.length){ alert('ไม่มีข้อมูลสำหรับดาวน์โหลด'); return; }
       const info = QUOTA_DATA[currentCard] || {};
-      
       const rows = currentTxn.map(t => {
-        const rate = t.qty > 0 ? t.excl / t.qty : 0;
         return {
           'วันที่': t.dateStr,
           'Fleet Card': t.card,
@@ -561,11 +525,10 @@
           'ทะเบียนรถ': t.plate,
           'ประเภทน้ำมัน': t.product,
           'จำนวนลิตร': t.qty,
-          'อัตราเฉลี่ย (บาท/ลิตร)': parseFloat(rate.toFixed(4)),
-          'ยอดรวม Excl.VAT (บาท)': t.excl
+          'อัตรา (บ./ล.)': parseFloat((t.qty > 0 ? t.excl / t.qty : 0).toFixed(4)),
+          'Excl.VAT (บาท)': t.excl
         };
       });
-      
       const worksheet = XLSX.utils.json_to_sheet(rows);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
