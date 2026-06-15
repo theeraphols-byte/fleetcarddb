@@ -115,13 +115,14 @@
   .section-label::after{content:"";flex:1;height:1px;background:var(--line)}
 
   /* KPI */
-  .kpi-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px}
+  .kpi-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
   .kpi-title{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.02em}
   .kpi-big{font-family:var(--display);font-weight:700;font-size:34px;letter-spacing:-0.02em;margin-top:10px;line-height:1}
   .kpi-big small{font-size:14px;font-weight:500;color:var(--ink-soft);margin-left:4px;font-family:var(--body)}
   .kpi-sub{font-size:11.5px;color:var(--ink-soft);margin-top:9px}
   .basis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .basis.basis-3{grid-template-columns:repeat(3,1fr)}
   .basis .b{background:#F7F9F6;border:1px solid var(--line);border-radius:9px;padding:9px 8px;text-align:center}
   .basis .b .m{font-size:10px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono)}
   .basis .b .v{font-family:var(--mono);font-weight:600;font-size:16px;margin-top:3px}
@@ -264,21 +265,34 @@ function toNum(v){
   return isNaN(n)?0:n;
 }
 function digitsOnly(s){ return String(s||"").replace(/\D/g,""); }
+// compare cards ignoring lost leading zeros / numeric or float coercion
+function cardKey(s){ const d=String(s==null?"":s).split(".")[0].replace(/\D/g,"").replace(/^0+/,""); return d||"0"; }
 function fmt(n,dec=2){
   return Number(n).toLocaleString("th-TH",{minimumFractionDigits:dec,maximumFractionDigits:dec});
 }
-// POST_DATE = "DD-MM-YYYY"  -> {y,m,d, key:"YYYY-MM", ts}
+// tolerant date parser: DD-MM-YYYY, YYYY-MM-DD, "/" "." separators,
+// 2-digit years, Buddhist years (>2400 -> CE). Returns null if unreadable.
 function parseDate(s){
-  if(!s) return null;
-  const p = String(s).trim().split(/[-/.]/);
+  if(s===null||s===undefined) return null;
+  const str = String(s).trim();
+  if(!str) return null;
+  const p = str.split(/[-/.\s]+/).filter(Boolean);
   if(p.length<3) return null;
-  let d=+p[0], m=+p[1], y=+p[2];
+  let a=+p[0], b=+p[1], c=+p[2];
+  if([a,b,c].some(v=>isNaN(v))) return null;
+  let d,m,y;
+  if(a>31){ y=a; m=b; d=c; }      // year-first (e.g. 2026-06-22)
+  else    { d=a; m=b; y=c; }      // day-first  (e.g. 22-06-2026)
   if(y<100) y+=2000;
-  if(!d||!m||!y) return null;
+  if(y>2400) y-=543;              // Buddhist Era -> CE
+  if(m>12 && d<=12){ const t=m; m=d; d=t; }  // tolerate reversed day/month
+  if(!d||!m||!y||m<1||m>12||d<1||d>31) return null;
   return { y, m, d, key:`${y}-${String(m).padStart(2,"0")}`, ts:new Date(y,m-1,d).getTime() };
 }
 function fmtCard(s){
-  const d = digitsOnly(s).padEnd(16,"").slice(0,16);
+  let d = digitsOnly(s);
+  if(d.length<16) d = d.padStart(16,"0");  // restore lost leading zeros for display
+  d = d.slice(0,16);
   return d.replace(/(.{4})/g,"$1 ").trim();
 }
 
@@ -321,8 +335,8 @@ async function doLogin(){
   $("#loadingScreen").style.display = "flex";
   try{
     await ensureData();
-    const quotaRow = DATA.quota.find(r => digitsOnly(r["Fleet Card"])===card);
-    const txRows   = DATA.tx.filter(r => digitsOnly(r["CARD_NO"])===card);
+    const quotaRow = DATA.quota.find(r => cardKey(r["Fleet Card"])===cardKey(card));
+    const txRows   = DATA.tx.filter(r => cardKey(r["CARD_NO"])===cardKey(card));
 
     if(!quotaRow && txRows.length===0){
       $("#loadingScreen").style.display="none";
@@ -402,7 +416,7 @@ function renderApp(card, q, txAll){
   const parsed = txAll.map(r=>{
     const litre = toNum(r["QTY_LITRE"]);
     const excl  = toNum(r["EXCLUDE_VAT_AMOUNT"]);
-    const dt = parseDate(r["POST_DATE"]);
+    const dt = parseDate(r["TRN_DATE"]) || parseDate(r["POST_DATE"]) || parseDate(r["Date"]);
     return {
       raw:r, dt,
       litre, excl,
@@ -462,19 +476,13 @@ function renderApp(card, q, txAll){
     <div class="section-label">โควต้า Q3 2026 (ก.ค.–ก.ย.)</div>
     <div class="kpi-grid">
       <div class="card">
-        <div class="kpi-title">ฐานคำนวณ — เติมจริง เม.ย.–มิ.ย.</div>
-        <div class="basis">
+        <div class="kpi-title">ฐานคำนวณโควต้า — เติมจริง เม.ย.–มิ.ย.</div>
+        <div class="basis basis-3">
           <div class="b"><div class="m">Apr</div><div class="v">${fmt(qApr,0)}</div></div>
           <div class="b"><div class="m">May</div><div class="v">${fmt(qMay,0)}</div></div>
-          <div class="b"><div class="m">Jun</div><div class="v">${fmt(qJun,0)}</div></div>
-          <div class="b avg"><div class="m">Avg</div><div class="v">${fmt(qAvg,0)}</div></div>
+          <div class="b"><div class="m">Jun *</div><div class="v">${fmt(qJun,0)}</div></div>
         </div>
-        <div class="kpi-sub">ตัวเลขจากระบบโควต้า (หน่วย: ลิตร) ใช้เป็นฐานกำหนดโควต้าไตรมาส</div>
-      </div>
-      <div class="card">
-        <div class="kpi-title">โควต้า / เดือน (1M)</div>
-        <div class="kpi-big">${fmt(oneM,0)}<small>ลิตร</small></div>
-        <div class="kpi-sub">เพดานการเติมต่อเดือนในไตรมาสนี้</div>
+        <div class="kpi-sub">หน่วย: ลิตร — ใช้เป็นฐานกำหนดโควต้าไตรมาส<br><b>*</b> มิ.ย. คิดแบบ Prorata 15 วัน</div>
       </div>
       <div class="card">
         <div class="kpi-title">โควต้า / ไตรมาส (1Q)</div>
@@ -498,16 +506,16 @@ function renderApp(card, q, txAll){
       <div class="card usage-card">
         <div class="lbl">เติมจริง 3 เดือน (เม.ย.–มิ.ย. 2026)</div>
         <div class="big">${fmt(fillsAprJun,0)}<small>ลิตร</small></div>
-        <div class="note">การเติมจริงรายเดือน เทียบกับโควต้า/เดือน (1M)</div>
+        <div class="note">การเติมจริงรายเดือน เม.ย.–มิ.ย.</div>
         <div class="qtr-list">
-          ${aprJunMonths.map((m,i)=>{
-            const used=aprJunByMonth[i]; const pct=oneM>0?Math.min(100,used/oneM*100):0;
+          ${(()=>{ const maxAJ=Math.max(1,...aprJunByMonth); return aprJunMonths.map((m,i)=>{
+            const used=aprJunByMonth[i]; const pct=used/maxAJ*100;
             return `<div class="qtr-row">
               <span class="qm">${TH_MONTH[m]}</span>
-              <span class="qbar"><i style="width:${pct}%;background:${used>oneM&&oneM>0?'var(--red)':'var(--petrol)'}"></i></span>
+              <span class="qbar"><i style="width:${pct}%;background:var(--petrol)"></i></span>
               <span class="qv">${fmt(used,0)} ล.</span>
             </div>`;
-          }).join("")}
+          }).join(""); })()}
         </div>
       </div>
     </div>
@@ -530,26 +538,15 @@ function renderApp(card, q, txAll){
             <th class="num">จำนวนลิตร</th>
             <th class="num">ราคา/ลิตร</th>
             <th class="num">ยอด (ไม่รวม VAT)</th>
-            ${hasQuota?`<th class="num">เทียบโควต้า/เดือน</th>`:``}
           </tr></thead>
           <tbody>
             ${ months.length ? months.map(m=>{
                 const ppl = m.litre>0 ? m.excl/m.litre : 0;
-                let cmp = "";
-                if(hasQuota){
-                  const pct = oneM>0 ? m.litre/oneM*100 : 0;
-                  const over = oneM>0 && m.litre>oneM;
-                  cmp = `<td class="num"><span class="minibar">
-                      <span class="track"><i style="width:${Math.min(100,pct)}%;background:${over?'var(--red)':'var(--green)'}"></i></span>
-                      <span class="pct" style="color:${over?'var(--red)':'var(--ink)'}">${fmt(pct,0)}%</span>
-                    </span></td>`;
-                }
                 return `<tr>
                   <td class="l tag-mon">${TH_MONTH[m.m]} ${m.y}</td>
                   <td class="num">${fmt(m.litre,2)}</td>
                   <td class="num">${fmt(ppl,2)}</td>
                   <td class="num">${fmt(m.excl,2)}</td>
-                  ${cmp}
                 </tr>`;
               }).join("") + `
               <tr class="total-row">
@@ -557,9 +554,8 @@ function renderApp(card, q, txAll){
                 <td class="num">${fmt(totL,2)}</td>
                 <td class="num">${fmt(totL>0?totE/totL:0,2)}</td>
                 <td class="num">${fmt(totE,2)}</td>
-                ${hasQuota?`<td></td>`:``}
               </tr>`
-              : `<tr><td class="empty" colspan="${hasQuota?5:4}">ยังไม่มีรายการเติมน้ำมันตั้งแต่ ม.ค. 2026</td></tr>` }
+              : `<tr><td class="empty" colspan="4">ยังไม่มีรายการเติมน้ำมันตั้งแต่ ม.ค. 2026</td></tr>` }
           </tbody>
         </table>
       </div>
@@ -643,7 +639,7 @@ function renderTxPage(){
 /* ---------- xlsx export (all rows for this card) ---------- */
 function exportXLSX(name){
   const rows = VIEW.txRows.map(t=>({
-    "วันที่ (POST_DATE)": `${t.dt.d.toString().padStart(2,"0")}-${t.dt.m.toString().padStart(2,"0")}-${t.dt.y}`,
+    "วันที่ (TRN_DATE)": `${t.dt.d.toString().padStart(2,"0")}-${t.dt.m.toString().padStart(2,"0")}-${t.dt.y}`,
     "Fleet card": fmtCard(t.cardNo),
     "รหัสพนักงาน": t.empCode,
     "ชื่อพนักงาน": t.name,
