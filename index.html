@@ -1,7 +1,243 @@
-// ==================== [ ตั้งค่าลิงก์เชื่อมต่อ SHEETDB ] ====================
-// ⚠️ อย่าลืมใส่ API ID ของคุณแทนที่ข้อความด้านล่างนี้นะครับ
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet Card Dashboard — CJ Mart</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',Arial,sans-serif;background:#f5f4f0;color:#2c2c2a;min-height:100vh}
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem}
+.login-card{background:#fff;border-radius:16px;box-shadow:0 2px 24px rgba(0,0,0,0.10);padding:2.5rem 2rem;max-width:420px;width:100%}
+.login-logo{text-align:center;margin-bottom:2rem}
+.logo-icon{width:64px;height:64px;background:#185FA5;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.logo-icon svg{width:36px;height:36px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}
+.login-logo h1{font-size:22px;font-weight:600;color:#1a1a1a}
+.login-logo p{font-size:14px;color:#888;margin-top:4px}
+.form-label{font-size:14px;font-weight:500;color:#444;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;font-family:monospace;letter-spacing:1.5px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;background:#fafafa}
+.form-input:focus{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,0.12);background:#fff}
+.btn-login{width:100%;margin-top:1.25rem;padding:13px;background:#185FA5;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:'Sarabun',Arial,sans-serif;transition:background 0.2s}
+.btn-login:hover:not(:disabled){background:#0C447C}
+.btn-login:disabled{background:#cccccc;cursor:not-allowed}
+.error-msg{color:#B91C1C;font-size:13px;margin-top:8px;display:none;padding:8px 12px;background:#FEF2F2;border-radius:8px}
+.update-note{text-align:center;margin-top:1.25rem;font-size:12px;color:#666;font-weight:500}
+.dash-page{display:none;min-height:100vh;background:#f5f4f0}
+.dash-topbar{background:#fff;border-bottom:1px solid #e8e8e4;padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo{width:36px;height:36px;background:#185FA5;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.topbar-logo svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.topbar-title{font-size:15px;font-weight:600;color:#1a1a1a}
+.btn-logout{background:none;border:1px solid #ddd;border-radius:8px;padding:6px 14px;font-size:13px;color:#666;cursor:pointer;font-family:'Sarabun',Arial,sans-serif}
+.btn-logout:hover{background:#f5f4f0}
+.dash-body{padding:1.5rem;max-width:1100px;margin:0 auto}
+.emp-header{background:#fff;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.emp-avatar{width:48px;height:48px;border-radius:12px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#185FA5;flex-shrink:0}
+.emp-name{font-size:18px;font-weight:600;color:#1a1a1a}
+.emp-sub{font-size:13px;color:#888;margin-top:2px}
+.emp-badge{margin-left:auto;background:#EFF6FF;color:#185FA5;font-size:12px;font-weight:500;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.quarter-label{font-size:13px;color:#888;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.quarter-tag{background:#185FA5;color:#fff;font-size:11px;padding:2px 10px;border-radius:20px;font-weight:500}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+.kpi-card{background:#fff;border-radius:12px;padding:1.25rem 1.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.kpi-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.kpi-icon svg{width:20px;height:20px;fill:none;stroke-width:1.8;stroke-linecap:round}
+.kpi-lbl{font-size:12px;color:#888;font-weight:500;letter-spacing:0.3px}
+.kpi-val{font-size:28px;font-weight:600;margin-top:4px;line-height:1}
+.kpi-unit{font-size:13px;color:#888;margin-top:4px}
+.kpi-bar-wrap{height:6px;background:#f0f0ee;border-radius:3px;margin-top:12px;overflow:hidden}
+.kpi-bar{height:100%;border-radius:3px;transition:width 0.8s ease}
+.kpi-blue .kpi-icon{background:#EFF6FF}.kpi-blue .kpi-icon svg{stroke:#185FA5}.kpi-blue .kpi-val{color:#185FA5}
+.kpi-green .kpi-icon{background:#F0FDF4}.kpi-green .kpi-icon svg{stroke:#15803D}.kpi-green .kpi-val{color:#15803D}
+.kpi-amber .kpi-icon{background:#FFFBEB}.kpi-amber .kpi-icon svg{stroke:#B45309}.kpi-amber .kpi-val{color:#B45309}
+.kpi-red .kpi-icon{background:#FEF2F2}.kpi-red .kpi-icon svg{stroke:#B91C1C}.kpi-red .kpi-val{color:#B91C1C}
+.section{background:#fff;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-head-left{display:flex;align-items:center;gap:8px}
+.section-head h3{font-size:15px;font-weight:600;color:#1a1a1a}
+.section-head svg{width:18px;height:18px;fill:none;stroke:#888;stroke-width:1.8;stroke-linecap:round}
+.quota-calc-container{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.quota-calc-subcard{background:#fcfbfa;border:1px solid #eaeae6;border-radius:8px;padding:10px 14px}
+.quota-calc-subcard .lbl{font-size:12px;color:#888}
+.quota-calc-subcard .val{font-size:15px;font-weight:600;color:#2c2c2a;margin-top:2px}
+.btn-dl{display:flex;align-items:center;gap:6px;background:#f0f9f4;border:1px solid #bbddc9;border-radius:8px;padding:6px 14px;font-size:13px;color:#15803D;cursor:pointer;font-family:'Sarabun',Arial,sans-serif;font-weight:500;transition:background 0.15s}
+.btn-dl:hover{background:#dcf3e7}
+.btn-dl svg{width:15px;height:15px;fill:none;stroke:#15803D;stroke-width:2;stroke-linecap:round}
+.ovf{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:9px 12px;font-size:12px;font-weight:600;color:#888;border-bottom:1.5px solid #f0f0ee;white-space:nowrap;letter-spacing:0.3px}
+td{padding:10px 12px;border-bottom:1px solid #f5f4f0;color:#2c2c2a;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fafaf8}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.empty{text-align:center;color:#888;padding:2rem 0}
+.pagination{display:flex;align-items:center;gap:8px;margin-top:1rem;justify-content:flex-end;flex-wrap:wrap}
+.pg-info{font-size:13px;color:#888;margin-right:auto}
+.pg-btn{background:none;border:1px solid #ddd;border-radius:7px;padding:5px 12px;font-size:13px;color:#444;cursor:pointer;font-family:'Sarabun',Arial,sans-serif;transition:background 0.15s}
+.pg-btn:hover:not(:disabled){background:#f0f0ee}
+.pg-btn:disabled{color:#ccc;cursor:default}
+.pg-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
+@media(max-width:768px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .quota-calc-container {grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr}
+  .quota-calc-container {grid-template-columns:1fr}
+  .emp-badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h14M3 18h10"/><circle cx="19" cy="17" r="3"/><path d="M19 8v6"/></svg>
+      </div>
+      <h1>Fleet Card Dashboard</h1>
+      <p>ระบบติดตามข้อมูลโวตต้าน้ำมัน</p>
+    </div>
+    <label class="form-label" for="cardInput">หมายเลข Fleet Card (16 หลัก)</label>
+    <input type="text" id="cardInput" class="form-input" maxlength="16"
+      placeholder="กรุณากรอกเลข Fleet Card"
+      oninput="this.value=this.value.replace(/\D/g,'')"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <div id="loginError" class="error-msg">❌ ไม่พบ Fleet Card นี้ในระบบ หรือกำลังโหลดข้อมูล กรุณาตรวจสอบอีกครั้ง</div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()" disabled>กำลังโหลดข้อมูลระบบ...</button>
+    <p class="update-note" id="globalMaxDateDisplay">ข้อมูล Post ล่าสุด ณ วันที่ —</p>
+  </div>
+</div>
+
+<div class="dash-page" id="dashPage">
+  <div class="dash-topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h14M3 18h10"/><circle cx="19" cy="17" r="3"/></svg>
+      </div>
+      <span class="topbar-title">Fleet Card Dashboard</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">← ออกจากระบบ</button>
+  </div>
+  <div class="dash-body">
+    <div class="emp-header">
+      <div class="emp-avatar" id="empAvatar">—</div>
+      <div>
+        <div class="emp-name" id="empName">—</div>
+        <div class="emp-sub" id="empSub">—</div>
+      </div>
+      <div class="emp-badge" id="empBadge">—</div>
+    </div>
+
+    <div class="quarter-label">
+      <svg width="16" height="16" fill="none" stroke="#888" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      โควต้าน้ำมัน &nbsp;<span class="quarter-tag">Q3/2026 (ก.ค. – ก.ย. 2569)</span>
+    </div>
+    
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div class="kpi-lbl">โควต้ารวม Q3/2026</div>
+        <div class="kpi-val" id="kpiQuota">—</div>
+        <div class="kpi-unit">ลิตร / ไตรมาส</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 4 6 4 10c0 7 8 12 8 12s8-5 8-12c0-4-4-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="kpi-lbl">เติมแล้วในไตรมาสนี้</div>
+        <div class="kpi-val" id="kpiUsed">—</div>
+        <div class="kpi-unit" id="kpiUsedPct">0%</div>
+        <div class="kpi-bar-wrap"><div class="kpi-bar" id="kpiBar" style="width:0%"></div></div>
+      </div>
+      <div class="kpi-card kpi-amber" id="kpiRemainCard">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 22V12M12 12l-4-4M12 12l4-4"/><path d="M4 18h16"/></svg></div>
+        <div class="kpi-lbl">คงเหลือไตรมาสนี้</div>
+        <div class="kpi-val" id="kpiRemain">—</div>
+        <div class="kpi-unit">ลิตร</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-left">
+          <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <h3>รายละเอียดการคำนวณโควต้าประจำไตรมาส Q3/2026</h3>
+        </div>
+      </div>
+      <div class="quota-calc-container">
+        <div class="quota-calc-subcard">
+          <div class="lbl">ยอดใช้รายเดือน Apr - Jun (ลิตร)</div>
+          <div class="val" id="calcMonths">Apr: - | May: - | Jun: -</div>
+        </div>
+        <div class="quota-calc-subcard">
+          <div class="lbl">ยอดเฉลี่ย 3 เดือน (Avg)</div>
+          <div class="val" id="calcAvg">0.00 ลิตร</div>
+        </div>
+        <div class="quota-calc-subcard">
+          <div class="lbl">บวกเพิ่ม 10% & ปัดลงหลัก 25</div>
+          <div class="val" id="calcRound">0 ลิตร / เดือน</div>
+        </div>
+        <div class="quota-calc-subcard" style="background: #f5f3ff; border-color: #ddd6fe;">
+          <div class="lbl" style="color: #6d28d9; font-weight: 500;">โควต้ารวมไตรมาส (x3)</div>
+          <div class="val" id="calcTotal" style="color: #6d28d9; font-size: 18px;">0 ลิตร</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-left">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+          <h3>สรุปยอดการใช้รายเดือน (ปี 2569)</h3>
+        </div>
+      </div>
+      <div class="ovf"><table>
+        <thead><tr>
+          <th>เดือน</th>
+          <th class="num">จำนวนลิตรที่ใช้จริง</th>
+          <th class="num">อัตราเฉลี่ย (บ./ล.)</th>
+          <th class="num">ยอดรวม Excl.VAT (บาท)</th>
+        </tr></thead>
+        <tbody id="monthBody"><tr><td colspan="4" class="empty">กำลังประมวลผลข้อมูล...</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-head-left">
+          <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+          <h3>รายการเติมน้ำมันทั้งหมด</h3>
+        </div>
+        <button class="btn-dl" onclick="downloadXlsx()">
+          <svg viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+          ดาวน์โหลด xlsx
+        </button>
+      </div>
+      <div class="ovf"><table>
+        <thead><tr>
+          <th>วันที่</th>
+          <th>Fleet Card</th>
+          <th>รหัสพนักงาน</th>
+          <th>ชื่อพนักงาน</th>
+          <th>ทะเบียนรถ</th>
+          <th>ประเภทน้ำมัน</th>
+          <th class="num">จำนวนลิตร</th>
+          <th class="num">อัตรา (บ./ล.)</th>
+          <th class="num">Excl.VAT (บาท)</th>
+        </tr></thead>
+        <tbody id="txnBody"><tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr></tbody>
+      </table></div>
+      <div class="pagination" id="paginationWrap"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ผูกลิงก์ API สดจาก SheetDB
 const TRANSACTION_API_URL = 'https://sheetdb.io/api/v1/ylnr70cqlor3c'; 
-const QUOTA_API_URL = 'https://sheetdb.io/api/v1/sa9f45pjgu4k3'; 
+const QUOTA_API_URL = 'https://sheetdb.io/api/v1/sa9f45pjgu4k3?sheet=Quota'; 
 
 let TXN_DATA = [];
 let QUOTA_DATA = {};
@@ -10,30 +246,27 @@ let currentTxn = [];
 let currentPage = 1;
 const PAGE_SIZE = 15;
 
-// โหลดข้อมูลทั้งหมดเมื่อเปิดเว็บเบราว์เซอร์
+// เริ่มรันระบบดึงข้อมูลจาก API พร้อมกันเมื่อเปิดหน้าบราวเซอร์
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    console.log('เริ่มเชื่อมต่อระบบเพื่อดึงข้อมูลจาก Google Sheets...');
+    console.log('กำลังดาวน์โหลดฐานข้อมูลจากระบบ SheetDB...');
     
-    // 1. ดึงข้อมูลพร้อมกันทั้งสองชีตผ่าน API
     const [txnRes, quotaRes] = await Promise.all([
       fetch(TRANSACTION_API_URL).then(res => {
-        if (!res.ok) throw new Error(`ไม่สามารถติดต่อแท็บ Transaction ได้ (Status ${res.status})`);
+        if (!res.ok) throw new Error(`ไม่สามารถเชื่อมต่อชีต Transaction ได้ (Status ${res.status})`);
         return res.json();
       }),
       fetch(QUOTA_API_URL).then(res => {
-        if (!res.ok) throw new Error(`ไม่สามารถติดต่อแท็บ Quota ได้ (Status ${res.status})`);
+        if (!res.ok) throw new Error(`ไม่สามารถเชื่อมต่อชีต Quota ได้ (Status ${res.status})`);
         return res.json();
       })
     ]);
 
-    console.log('ดาวน์โหลดข้อมูลจาก Google Sheets สำเร็จ!');
-
     if (txnRes.error || quotaRes.error || !Array.isArray(txnRes)) {
-      throw new Error(txnRes.error || quotaRes.error || 'รูปแบบ API มีข้อผิดพลาด หรือใช้งานเกินโควต้าฟรีของเดือนนี้');
+      throw new Error(txnRes.error || quotaRes.error || 'โครงสร้างข้อมูลผิดพลาดหรือจำกัดโควต้า API เต็ม');
     }
 
-    // 2. Mapping ข้อมูลฝั่ง Transaction ให้เข้ากับหัวตารางชีตจริง
+    // แปลงโครงสร้างชีตตาราง Transaction
     TXN_DATA = txnRes.map((item) => {
       const qty = parseFloat(item['จำนวนลิตร'] || 0);
       const excl = parseFloat(item['ยอดรวม Excl.VAT (บาท)'] || item['ยอดรวม Excl.VAT'] || 0);
@@ -61,7 +294,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       };
     });
 
-    // 3. Mapping ข้อมูลฝั่ง Quota 
+    // แปลงโครงสร้างชีตตาราง Quota
     quotaRes.forEach(item => {
       const cardId = String(item['Fleet Card'] || '').trim().replace(/[^0-9]/g, '');
       if (cardId) {
@@ -72,51 +305,50 @@ window.addEventListener('DOMContentLoaded', async () => {
           team: String(item['ฝ่าย/ทีม'] || '').trim(),
           position: String(item['ตำแหน่ง'] || '').trim(),
           plate: String(item['ทะเบียนรถ'] || '').trim(),
-          aprQty: parseFloat(item['Apr-26'] || item['Apr'] || 0),
-          mayQty: parseFloat(item['May-26'] || item['May'] || 0),
-          junQty: parseFloat(item['Jun-26'] || item['Jun'] || 0),
-          q3Quota: parseFloat(item['โควต้ารายไตรมาส'] || item['โควต้า'] || 0)
+          // แมตช์ตามหัวตารางจริงในชีต (Apr-26, May-26, Jun-26, โควต้ารายไตรมาส)
+          aprQty: parseFloat(item['Apr-26'] || 0),
+          mayQty: parseFloat(item['May-26'] || 0),
+          junQty: parseFloat(item['Jun-26'] || 0),
+          q3Quota: parseFloat(item['โควต้ารายไตรมาส'] || 0)
         };
       }
     });
 
-    // 4. เรียกฟังก์ชันคำนวณหา วันที่ Post ล่าสุด
+    // หา Max date จาก transaction ว่า Post date ล่าสุดเมื่อไร
     calculateGlobalMaxDate();
 
-    // เปิดให้ระบบพร้อมกรอกข้อมูลเพื่อล็อกอิน
+    // เปิดหน้าจอให้พร้อมล็อกอิน
     const loginBtn = document.getElementById('loginBtn');
-    if(loginBtn) {
+    if (loginBtn) {
       loginBtn.innerText = 'เข้าดูข้อมูล →';
       loginBtn.disabled = false;
     }
 
   } catch (error) {
-    console.error('Error Logging:', error);
+    console.error('Initial error:', error);
     const errBox = document.getElementById('loginError');
     if (errBox) {
-      errBox.innerText = `❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message}`;
+      errBox.innerText = `❌ เกิดข้อผิดพลาด: ${error.message} (กรุณาเปิดแชร์ Google Sheets หรือตรวจความถูกต้อง)`;
       errBox.style.display = 'block';
     }
   }
 });
 
-// 🔄 ฟังก์ชันหาค่า Max Date จากคอลัมน์ "วันที่" ของแท็บ Transaction
+// ฟังก์ชันดึงค่า Max Date ของ Transaction
 function calculateGlobalMaxDate() {
   const displayEl = document.getElementById('globalMaxDateDisplay');
   if (!displayEl) return;
 
   if (!TXN_DATA.length) {
-    displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ — | ไม่พบข้อมูลในแท็บ Transaction";
+    displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ — | ไม่พบรายการธุรกรรม";
     return;
   }
   
   let maxDateObj = null;
-  
   TXN_DATA.forEach(t => {
     if (!t.dateStr) return;
     const parts = t.dateStr.split('/');
     if (parts.length === 3) {
-      // แปลง วัน/เดือน/ค.ศ. (เช่น 15/06/2026) ไปเป็น Date Object เพื่อเปรียบเทียบหาค่ามากที่สุด
       const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
       if (!isNaN(d.getTime())) {
         if (!maxDateObj || d > maxDateObj) {
@@ -130,16 +362,15 @@ function calculateGlobalMaxDate() {
     const monthsTh = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const day = maxDateObj.getDate();
     const monthStr = monthsTh[maxDateObj.getMonth()];
-    const yearTh = maxDateObj.getFullYear() + 543; // เปลี่ยน ค.ศ. เป็น พ.ศ. ให้พนักงานอ่านง่าย
+    const yearTh = maxDateObj.getFullYear() + 543;
     
-    // อัปเดตข้อความตามเงื่อนไข "ข้อมูล Post ล่าสุด ณ วันที่"
+    // แสดงข้อความข้อมูล Post ล่าสุด ณ วันที่
     displayEl.innerText = `ข้อมูล Post ล่าสุด ณ วันที่ ${day} ${monthStr} ${yearTh} | อัปเดตเรียลไทม์`;
   } else {
-    displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ — | โปรดตรวจสอบรูปแบบวันที่ใน Google Sheets (ต้องเป็น วว/ดด/ปปปป ค.ศ.)";
+    displayEl.innerText = "ข้อมูล Post ล่าสุด ณ วันที่ —";
   }
 }
 
-// ระบบค้นหาและเข้าสู่ระบบ Dashboard ด้วย Fleet Card 
 function doLogin(){
   const inputEl = document.getElementById('cardInput');
   const errBox = document.getElementById('loginError');
@@ -149,7 +380,7 @@ function doLogin(){
   if(!input) return;
   
   if(!QUOTA_DATA[input]){
-    errBox.innerText = '❌ ไม่พบหมายเลข Fleet Card นี้ในระบบ กรุณาตรวจสอบเลขอีกครั้ง';
+    errBox.innerText = '❌ ไม่พบหมายเลข Fleet Card นี้ในระบบ กรุณาตรวจสอบอีกครั้ง';
     errBox.style.display = 'block';
     return;
   }
@@ -177,33 +408,48 @@ function doLogout(){
 function renderDashboard(){
   const info = QUOTA_DATA[currentCard] || {};
   
-  const firstChar = info.name ? info.name.trim().charAt(0) : '—';
-  document.getElementById('empAvatar').innerText = firstChar;
+  document.getElementById('empAvatar').innerText = info.name ? info.name.trim().charAt(0) : '—';
   document.getElementById('empName').innerText = info.name || 'ไม่ทราบชื่อ';
-  document.getElementById('empSub').innerText = `${info.company || 'TD'} · ${info.team || 'ไม่ระบุ'} · ${info.position || 'พนักงาน'}`;
+  document.getElementById('empSub').innerText = `${info.company || 'TD'} · ${info.team || 'ไม่ระบุฝ่าย'} · ${info.position || 'พนักงาน'}`;
   document.getElementById('empBadge').innerText = `ทะเบียนรถ: ${info.plate || '—'}`;
   
+  // สรุปสูตรการคำนวณตามเงื่อนไข (ข้อ 3)
+  const apr = info.aprQty || 0;
+  const may = info.mayQty || 0;
+  const jun = info.junQty || 0;
+  const avg = (apr + may + jun) / 3;
+  const plusTenPercent = avg * 1.1;
+  const roundDown25 = Math.floor(plusTenPercent / 25) * 25;
+  const computedTotalQuota = roundDown25 * 3;
+
+  // เรนเดอร์ลงกล่องข้อมูลสูตรคำนวณ Q3/2026
+  document.getElementById('calcMonths').innerText = `Apr: ${apr.toLocaleString()} | May: ${may.toLocaleString()} | Jun: ${jun.toLocaleString()}`;
+  document.getElementById('calcAvg').innerText = `${avg.toFixed(2)} ลิตร`;
+  document.getElementById('calcRound').innerText = `${roundDown25.toLocaleString()} ลิตร (บวก10%=${plusTenPercent.toFixed(1)})`;
+  document.getElementById('calcTotal').innerText = `${computedTotalQuota.toLocaleString()} ลิตร`;
+
+  // ดึงค่าโควต้ารวม Q3 จากคอลัมน์ O ในชีตจริงเป็นหลัก ถ้าไม่มีให้ดึงตัวแปรที่คำนวณมาทดแทน
+  const displayQuota = info.q3Quota > 0 ? info.q3Quota : computedTotalQuota;
+  
+  // คำนวณยอดเติมของ Q3 (เดือน 7, 8, 9 ปี 2026)
   const q3Txns = currentTxn.filter(t => t.year === 2026 && (t.month === 7 || t.month === 8 || t.month === 9));
   const usedQty = q3Txns.reduce((sum, t) => sum + t.qty, 0);
-  const totalQuota = info.q3Quota || 0;
-  const remainQty = totalQuota - usedQty;
-  
-  document.getElementById('kpiQuota').innerText = totalQuota.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('kpiUsed').innerText = usedQty.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('kpiRemain').innerText = remainQty.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const remainQty = displayQuota - usedQty;
+
+  document.getElementById('kpiQuota').innerText = displayQuota.toLocaleString(undefined, {minimumFractionDigits: 0});
+  document.getElementById('kpiUsed').innerText = usedQty.toLocaleString(undefined, {minimumFractionDigits: 2});
+  document.getElementById('kpiRemain').innerText = remainQty.toLocaleString(undefined, {minimumFractionDigits: 2});
   
   const remainCard = document.getElementById('kpiRemainCard');
   if(remainQty < 0) {
-    remainCard.style.background = '#FEF2F2';
+    remainCard.className = 'kpi-card kpi-red';
     remainCard.querySelector('.kpi-lbl').innerText = 'เติมน้ำมันเกินโควต้า (ลิตร)';
-    remainCard.querySelector('.kpi-lbl').style.color = '#B91C1C';
   } else {
-    remainCard.style.background = '#fff';
-    remainCard.querySelector('.kpi-lbl').innerText = 'คงเหลือ';
-    remainCard.querySelector('.kpi-lbl').style.color = '#888';
+    remainCard.className = 'kpi-card kpi-amber';
+    remainCard.querySelector('.kpi-lbl').innerText = 'คงเหลือไตรมาสนี้';
   }
   
-  let pct = totalQuota > 0 ? (usedQty / totalQuota) * 100 : 0;
+  let pct = displayQuota > 0 ? (usedQty / displayQuota) * 100 : 0;
   if(pct > 100) pct = 100;
   document.getElementById('kpiBar').style.width = `${pct}%`;
   document.getElementById('kpiUsedPct').innerText = `ใช้ไปแล้ว ${pct.toFixed(1)}% ของโควต้ารวม`;
@@ -235,14 +481,14 @@ function renderMonthlySummary(){
     if(mTxns.length > 0 || item.qQuota > 0) hasData = true;
     
     html += `<tr>
-      <td>${item.label} ${item.qQuota > 0 ? `<span style="font-size:11px;color:#666;background:#eef4f8;padding:2px 6px;border-radius:10px;margin-left:6px">โควต้าเดือนนี้: ${item.qQuota} ลิตร</span>` : ''}</td>
-      <td class="num">${sumQty.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+      <td>${item.label} ${item.qQuota > 0 ? `<span style="font-size:11px;color:#185fa5;background:#eef4f8;padding:2px 6px;border-radius:10px;margin-left:6px">โควต้า: ${item.qQuota} ลิตร</span>` : ''}</td>
+      <td class="num">${sumQty.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
       <td class="num">${avgRate > 0 ? avgRate.toFixed(2) : '0.00'}</td>
-      <td class="num">${sumExcl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+      <td class="num">${sumExcl.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
     </tr>`;
   });
   
-  tbody.innerHTML = hasData ? html : `<tr><td colspan="4" class="empty">ไม่มีประวัติการเติมน้ำมันในไตรมาสนี้</td></tr>`;
+  tbody.innerHTML = hasData ? html : `<tr><td colspan="4" class="empty">ไม่มีประวัติประมวลผล</td></tr>`;
 }
 
 function renderTxnPage(){
@@ -250,12 +496,11 @@ function renderTxnPage(){
   if(!tbody) return;
   
   if(!currentTxn.length){
-    tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรนี้ในระบบ</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="empty">ไม่พบประวัติการเติมน้ำมันของบัตรนี้ในระบบคลัง</td></tr>`;
     document.getElementById('paginationWrap').innerHTML = '';
     return;
   }
   
-  // เรียงลำดับจากวันที่ล่าสุดขึ้นก่อน (Latest Post First)
   let currentTxnsSorted = [...currentTxn].sort((a,b) => {
     const pA = a.dateStr.split('/');
     const pB = b.dateStr.split('/');
@@ -284,7 +529,7 @@ function renderTxnPage(){
       <td><span style="font-size:11.5px;background:#f0f0ee;padding:3px 8px;border-radius:6px;font-weight:500">${t.product}</span></td>
       <td class="num">${t.qty.toFixed(2)}</td>
       <td class="num">${rate.toFixed(2)}</td>
-      <td class="num">${t.excl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+      <td class="num">${t.excl.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
     </tr>`;
   });
   
@@ -319,7 +564,7 @@ function goPage(p){
 }
 
 function downloadXlsx(){
-  if(!currentTxn.length){ alert('ไม่มีข้อมูลธุรกรรมน้ำมันสำหรับดาวน์โหลด'); return; }
+  if(!currentTxn.length){ alert('ไม่มีข้อมูลสำหรับดาวน์โหลด'); return; }
   const info = QUOTA_DATA[currentCard] || {};
   
   const rows = currentTxn.map(t => {
@@ -339,6 +584,9 @@ function downloadXlsx(){
   
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "FleetCard_Transactions");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
   XLSX.writeFile(workbook, `FleetCard_Report_${info.empCode || currentCard}.xlsx`);
 }
+</script>
+</body>
+</html>
