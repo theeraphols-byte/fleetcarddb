@@ -254,6 +254,21 @@ function pick(row) {
   };
 }
 
+/* ── detect which key in a row holds the fleet card number ── */
+function detectCardKey(row, card) {
+  // try known variants first, then scan all fields for a value matching the card
+  var candidates = ['card','Card','CARD','fleet_card','FleetCard','หมายเลขบัตร','เลขบัตร','บัตร'];
+  for (var i = 0; i < candidates.length; i++) {
+    if (row[candidates[i]] !== undefined) return candidates[i];
+  }
+  // fallback: find any field whose normalised value matches
+  var keys = Object.keys(row);
+  for (var j = 0; j < keys.length; j++) {
+    if (normCard(String(row[keys[j]])) === card) return keys[j];
+  }
+  return null;
+}
+
 /* ── login ── */
 async function doLogin() {
   var raw  = document.getElementById('cardInput').value.trim();
@@ -272,18 +287,27 @@ async function doLogin() {
   btn.textContent = 'กำลังตรวจสอบ...';
 
   try {
-    var res  = await fetch(API_QUOTA + '/search?card=' + encodeURIComponent(card));
-    if (!res.ok) throw new Error('quota api error');
-    var rows = await res.json();
+    var res  = await fetch(API_QUOTA);
+    if (!res.ok) throw new Error('quota api ' + res.status);
+    var allRows = await res.json();
 
-    if (!rows || rows.length === 0) {
+    if (!Array.isArray(allRows) || allRows.length === 0) throw new Error('empty quota');
+
+    // detect card column from first row
+    var cardKey = detectCardKey(allRows[0], card) || Object.keys(allRows[0])[0];
+
+    var matched = allRows.filter(function(r) {
+      return normCard(String(r[cardKey] || '')) === card;
+    });
+
+    if (matched.length === 0) {
       errEl.textContent = '❌ ไม่พบ Fleet Card นี้ในระบบ กรุณาตรวจสอบตัวเลขอีกครั้ง';
       errEl.style.display = 'block';
     } else {
-      showDash(card, rows[0]);
+      showDash(card, matched[0]);
     }
   } catch (e) {
-    errEl.textContent = '❌ เชื่อมต่อระบบไม่ได้ กรุณาลองใหม่อีกครั้ง';
+    errEl.textContent = '❌ เชื่อมต่อระบบไม่ได้ (' + e.message + ') กรุณาลองใหม่อีกครั้ง';
     errEl.style.display = 'block';
   } finally {
     btn.disabled = false;
@@ -329,11 +353,20 @@ async function showDash(card, quotaRow) {
   document.getElementById('paginationWrap').innerHTML = '';
 
   try {
-    var res2 = await fetch(API_TXN + '/search?card=' + encodeURIComponent(card));
-    if (!res2.ok) throw new Error('txn api error');
+    var res2 = await fetch(API_TXN);
+    if (!res2.ok) throw new Error('txn api ' + res2.status);
     var rows2 = await res2.json();
 
-    var txns = (rows2 || []).map(function(r) {
+    // detect card column from first transaction row
+    var txnCardKey = rows2 && rows2.length > 0
+      ? (detectCardKey(rows2[0], card) || Object.keys(rows2[0])[0])
+      : 'card';
+
+    rows2 = (rows2 || []).filter(function(r) {
+      return normCard(String(r[txnCardKey] || '')) === card;
+    });
+
+    var txns = rows2.map(function(r) {
       var g = pick(r);
       var dateStr = g(['dateStr','date','วันที่']) || '';
       var parsed  = parseDateStr(dateStr);
