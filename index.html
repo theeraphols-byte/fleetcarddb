@@ -54,7 +54,7 @@
     position:relative;
   }
   .pump-head .eyebrow{
-    font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    font-family:var(--body);font-size:11.5px;font-weight:600;letter-spacing:.04em;
     color:var(--amber);display:flex;align-items:center;gap:8px;
   }
   .pump-head .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px rgba(224,150,43,.25)}
@@ -119,6 +119,9 @@
   .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
   .kpi-title{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.02em}
   .kpi-big{font-family:var(--display);font-weight:700;font-size:34px;letter-spacing:-0.02em;margin-top:10px;line-height:1}
+  .kpi-big.kpi-big-xl{font-size:46px;color:var(--petrol)}
+  .card-hero{display:flex;flex-direction:column;justify-content:center}
+  .card-hero .kpi-big{margin-top:8px}
   .kpi-big small{font-size:14px;font-weight:500;color:var(--ink-soft);margin-left:4px;font-family:var(--body)}
   .kpi-sub{font-size:11.5px;color:var(--ink-soft);margin-top:9px}
   .basis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
@@ -216,7 +219,7 @@
 <section id="login">
   <div class="pump">
     <div class="pump-head">
-      <div class="eyebrow">Fleet Fuel Terminal</div>
+      <div class="eyebrow" id="loginUpdated">กำลังโหลดข้อมูล…</div>
       <h1>โควต้าน้ำมัน Fleet Card</h1>
       <p>ใส่เลขบัตร Fleet card ของคุณเพื่อดูโควต้าและประวัติการเติมน้ำมัน</p>
     </div>
@@ -270,16 +273,13 @@ function cardKey(s){ const d=String(s==null?"":s).split(".")[0].replace(/\D/g,""
 function fmt(n,dec=2){
   return Number(n).toLocaleString("th-TH",{minimumFractionDigits:dec,maximumFractionDigits:dec});
 }
-// tolerant date parser: DD-MM-YYYY, YYYY-MM-DD, "/" "." separators,
-// 2-digit years, Buddhist years (>2400 -> CE). Returns null if unreadable.
+// tolerant date parser: DD-MM-YYYY, YYYY-MM-DD, "/" "." separators, 2-digit
+// years, Buddhist years (>2400 -> CE), and stray chars / time suffixes.
 function parseDate(s){
   if(s===null||s===undefined) return null;
-  const str = String(s).trim();
-  if(!str) return null;
-  const p = str.split(/[-/.\s]+/).filter(Boolean);
-  if(p.length<3) return null;
-  let a=+p[0], b=+p[1], c=+p[2];
-  if([a,b,c].some(v=>isNaN(v))) return null;
+  const nums = String(s).match(/\d+/g);   // pull out numeric groups only
+  if(!nums || nums.length<3) return null;
+  let a=+nums[0], b=+nums[1], c=+nums[2];
   let d,m,y;
   if(a>31){ y=a; m=b; d=c; }      // year-first (e.g. 2026-06-22)
   else    { d=a; m=b; y=c; }      // day-first  (e.g. 22-06-2026)
@@ -306,19 +306,67 @@ cardInput.addEventListener("input",e=>{
 cardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
 $("#loginBtn").addEventListener("click",doLogin);
 
+// set the login-screen freshness label from currently loaded data
+function refreshUpdatedLabel(){
+  const el = document.getElementById("loginUpdated");
+  if(!el) return;
+  const dt = latestTxDate();
+  if(dt) el.textContent = `ข้อมูลอัปเดตถึง ${fmtDMY(dt)}`;
+}
+
+// warm the cache + show data freshness on the login screen (with retries)
+(async function initLogin(){
+  const el = document.getElementById("loginUpdated");
+  for(let attempt=1; attempt<=3; attempt++){
+    try{
+      await ensureData();
+      const dt = latestTxDate();
+      if(el) el.textContent = dt ? `ข้อมูลอัปเดตถึง ${fmtDMY(dt)}` : "ข้อมูลอัปเดตถึง —";
+      return;
+    }catch(e){
+      console.warn(`prefetch ครั้งที่ ${attempt} ล้มเหลว:`, e && e.message);
+      if(attempt<3) await new Promise(r=>setTimeout(r, 800*attempt));
+    }
+  }
+  if(el) el.textContent = "ข้อมูลอัปเดตถึง —";   // login will still retry the fetch
+})();
+
 /* ---------- data fetch ---------- */
 async function fetchJSON(url){
   const r = await fetch(url,{headers:{Accept:"application/json"}});
-  if(!r.ok) throw new Error("HTTP "+r.status);
+  if(!r.ok){
+    let body=""; try{ body=(await r.text()).slice(0,140); }catch(_){}
+    throw new Error("HTTP "+r.status+(body?` — ${body}`:""));
+  }
   return r.json();
 }
+let _dataPromise = null;
 async function ensureData(){
   if(DATA.tx && DATA.quota) return;
+  if(_dataPromise) return _dataPromise;
   $("#loadingMsg").textContent = "กำลังดึงข้อมูลโควต้าและรายการเติม…";
-  const [tx,quota] = await Promise.all([ fetchJSON(TRANSACTION_URL), fetchJSON(QUOTA_URL) ]);
-  DATA.tx = Array.isArray(tx)?tx:[];
-  DATA.quota = Array.isArray(quota)?quota:[];
+  _dataPromise = (async ()=>{
+    try{
+      const [tx,quota] = await Promise.all([ fetchJSON(TRANSACTION_URL), fetchJSON(QUOTA_URL) ]);
+      DATA.tx = Array.isArray(tx)?tx:[];
+      DATA.quota = Array.isArray(quota)?quota:[];
+    }catch(e){
+      _dataPromise = null;   // don't cache the failure — allow the next call to retry
+      throw e;
+    }
+  })();
+  return _dataPromise;
 }
+// latest transaction date across ALL rows (TRN_DATE primary) -> parsed date or null
+function latestTxDate(){
+  let best=null;
+  for(const r of (DATA.tx||[])){
+    const dt = parseDate(r["TRN_DATE"]) || parseDate(r["POST_DATE"]) || parseDate(r["Date"]);
+    if(dt && (!best || dt.ts>best.ts)) best=dt;
+  }
+  return best;
+}
+function fmtDMY(dt){ return dt ? `${String(dt.d).padStart(2,"0")}-${String(dt.m).padStart(2,"0")}-${dt.y}` : "—"; }
 
 /* ---------- main login flow ---------- */
 async function doLogin(){
@@ -346,6 +394,7 @@ async function doLogin(){
       errBox.classList.add("show");
       return;
     }
+    refreshUpdatedLabel();
     renderApp(card, quotaRow, txRows);
   }catch(err){
     $("#loadingScreen").style.display="none";
@@ -484,10 +533,9 @@ function renderApp(card, q, txAll){
         </div>
         <div class="kpi-sub">หน่วย: ลิตร — ใช้เป็นฐานกำหนดโควต้าไตรมาส<br><b>*</b> มิ.ย. คิดแบบ Prorata 15 วัน</div>
       </div>
-      <div class="card">
-        <div class="kpi-title">โควต้า / ไตรมาส (1Q)</div>
-        <div class="kpi-big">${fmt(oneQ,0)}<small>ลิตร</small></div>
-        <div class="kpi-sub">เพดานรวมตลอด Q3 (ก.ค.–ก.ย.)</div>
+      <div class="card card-hero">
+        <div class="kpi-title">โควต้าสำหรับ Q3 2026</div>
+        <div class="kpi-big kpi-big-xl">${fmt(oneQ,0)}<small>ลิตร</small></div>
       </div>
     </div>
 
@@ -504,12 +552,11 @@ function renderApp(card, q, txAll){
         </div>
       </div>
       <div class="card usage-card">
-        <div class="lbl">เติมจริง 3 เดือน (เม.ย.–มิ.ย. 2026)</div>
-        <div class="big">${fmt(fillsAprJun,0)}<small>ลิตร</small></div>
-        <div class="note">การเติมจริงรายเดือน เม.ย.–มิ.ย.</div>
+        <div class="lbl">เติมจริง 3 เดือน (ก.ค.–ก.ย. 2026)</div>
+        <div class="big">${fmt(q3Used,0)}<small>ลิตร</small></div>
         <div class="qtr-list">
-          ${(()=>{ const maxAJ=Math.max(1,...aprJunByMonth); return aprJunMonths.map((m,i)=>{
-            const used=aprJunByMonth[i]; const pct=used/maxAJ*100;
+          ${(()=>{ const maxQ=Math.max(1,...q3byMonth); return q3Months.map((m,i)=>{
+            const used=q3byMonth[i]; const pct=used/maxQ*100;
             return `<div class="qtr-row">
               <span class="qm">${TH_MONTH[m]}</span>
               <span class="qbar"><i style="width:${pct}%;background:var(--petrol)"></i></span>
@@ -529,7 +576,7 @@ function renderApp(card, q, txAll){
     <div class="section-label">สรุปรายเดือน (ตั้งแต่ ม.ค. 2026)</div>
     <div class="table-card">
       <div class="table-head">
-        <div><h3>การเติมน้ำมันรายเดือน</h3><div class="sub">ราคา/ลิตร = ยอดไม่รวม VAT ÷ จำนวนลิตรรวม • เทียบกับโควต้า/เดือน (1M)</div></div>
+        <div><h3>การเติมน้ำมันรายเดือน</h3><div class="sub">ราคา/ลิตร = ยอดไม่รวม VAT ÷ จำนวนลิตรรวม</div></div>
       </div>
       <div class="scroll">
         <table>
@@ -564,7 +611,7 @@ function renderApp(card, q, txAll){
     <div class="section-label">รายการเติมน้ำมัน (ราย transaction)</div>
     <div class="table-card">
       <div class="table-head">
-        <div><h3>ประวัติการเติม</h3><div class="sub">เรียงจากใหม่ไปเก่า • ราคา/ลิตร = ยอดไม่รวม VAT ÷ จำนวนลิตร</div></div>
+        <div><h3>ประวัติการเติม</h3><div class="sub">ข้อมูลอัปเดตถึง ${fmtDMY(latestTxDate())} • เรียงจากใหม่ไปเก่า • ราคา/ลิตร = ยอดไม่รวม VAT ÷ จำนวนลิตร</div></div>
         <button class="btn-dl" id="dlBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
           ดาวน์โหลด .xlsx
