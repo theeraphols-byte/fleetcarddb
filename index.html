@@ -20,7 +20,6 @@ body{font-family:'Sarabun',Arial,sans-serif;background:#f5f4f0;color:#2c2c2a;min
 .form-input:focus{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,0.12);background:#fff}
 .btn-login{width:100%;margin-top:1.25rem;padding:13px;background:#185FA5;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:'Sarabun',Arial,sans-serif;transition:background 0.2s}
 .btn-login:hover{background:#0C447C}
-.btn-login:disabled{background:#90aecb;cursor:not-allowed}
 .error-msg{color:#B91C1C;font-size:13px;margin-top:8px;display:none;padding:8px 12px;background:#FEF2F2;border-radius:8px}
 .update-note{text-align:center;margin-top:1.25rem;font-size:12px;color:#aaa}
 .dash-page{display:none;min-height:100vh;background:#f5f4f0}
@@ -69,7 +68,6 @@ tbody tr:hover td{background:#fafaf8}
 .total-row td{font-weight:600;background:#f8f8f6;border-top:1.5px solid #e8e8e4}
 .ovf{overflow-x:auto}
 .empty{text-align:center;color:#bbb;padding:2.5rem;font-size:14px}
-.loading{text-align:center;color:#888;padding:2.5rem;font-size:14px}
 .pagination{display:flex;align-items:center;gap:8px;margin-top:1rem;justify-content:flex-end;flex-wrap:wrap}
 .pg-info{font-size:13px;color:#888;margin-right:auto}
 .pg-btn{background:none;border:1px solid #ddd;border-radius:7px;padding:5px 12px;font-size:13px;color:#444;cursor:pointer;font-family:'Sarabun',Arial,sans-serif;transition:background 0.15s}
@@ -101,8 +99,8 @@ tbody tr:hover td{background:#fafaf8}
       oninput="this.value=this.value.replace(/\D/g,'')"
       onkeydown="if(event.key==='Enter')doLogin()">
     <div id="loginError" class="error-msg">❌ ไม่พบ Fleet Card นี้ในระบบ กรุณาตรวจสอบตัวเลขอีกครั้ง</div>
-    <button class="btn-login" id="btnLogin" onclick="doLogin()">เข้าดูข้อมูล →</button>
-    <p class="update-note">อัปเดตข้อมูลแบบ Real-time</p>
+    <button class="btn-login" onclick="doLogin()">เข้าดูข้อมูล →</button>
+    <p class="update-note">ข้อมูล ณ วันที่ 7 มิ.ย. 2569 &nbsp;|&nbsp; อัปเดตรายสัปดาห์</p>
   </div>
 </div>
 
@@ -128,18 +126,18 @@ tbody tr:hover td{background:#fafaf8}
 
     <div class="quarter-label">
       <svg width="16" height="16" fill="none" stroke="#888" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-      โควต้าน้ำมัน &nbsp;<span class="quarter-tag" id="quarterTag">Q3/2026 (ก.ค. – ก.ย. 2569)</span>
+      โควต้าน้ำมัน &nbsp;<span class="quarter-tag">Q3/2026 (ก.ค. – ก.ย. 2569)</span>
     </div>
     <div class="kpi-grid">
       <div class="kpi-card kpi-blue">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
         <div class="kpi-lbl">โควต้ารายไตรมาส</div>
         <div class="kpi-val" id="kpiQuota">—</div>
-        <div class="kpi-unit" id="kpiQuotaUnit">ลิตร</div>
+        <div class="kpi-unit">ลิตร (Q3/2026)</div>
       </div>
       <div class="kpi-card kpi-green">
         <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 4 6 4 10c0 7 8 12 8 12s8-5 8-12c0-4-4-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <div class="kpi-lbl">เติมแล้ว (ไตรมาสปัจจุบัน)</div>
+        <div class="kpi-lbl">เติมแล้ว (Q3/2026)</div>
         <div class="kpi-val" id="kpiUsed">—</div>
         <div class="kpi-unit" id="kpiUsedPct">ลิตร</div>
         <div class="kpi-bar-wrap"><div class="kpi-bar" id="kpiBar" style="width:0%"></div></div>
@@ -156,7 +154,7 @@ tbody tr:hover td{background:#fafaf8}
       <div class="section-head">
         <div class="section-head-left">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
-          <h3>สรุปรายเดือน</h3>
+          <h3>สรุปรายเดือน (ปี 2569)</h3>
         </div>
       </div>
       <div class="ovf"><table>
@@ -166,7 +164,7 @@ tbody tr:hover td{background:#fafaf8}
           <th class="num">อัตราเฉลี่ย (บ./ล.)</th>
           <th class="num">ยอดรวม Excl.VAT (บาท)</th>
         </tr></thead>
-        <tbody id="monthBody"><tr><td colspan="4" class="loading">กำลังโหลด...</td></tr></tbody>
+        <tbody id="monthBody"><tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr></tbody>
       </table></div>
     </div>
 
@@ -193,321 +191,338 @@ tbody tr:hover td{background:#fafaf8}
           <th class="num">อัตรา (บ./ล.)</th>
           <th class="num">Excl.VAT (บาท)</th>
         </tr></thead>
-        <tbody id="txnBody"><tr><td colspan="9" class="loading">กำลังโหลด...</td></tr></tbody>
+        <tbody id="txnBody"><tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr></tbody>
       </table></div>
       <div class="pagination" id="paginationWrap"></div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const MONTH_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const PAGE_SIZE = 10;
-
+/* ── SheetDB API endpoints ── */
 const API_TXN   = 'https://sheetdb.io/api/v1/ylnr70cqlor3c';
 const API_QUOTA = 'https://sheetdb.io/api/v1/xt4yw5woqnawa';
 
-// Current quarter — update each quarter
-const CUR_Q_MONTHS = [7, 8, 9];
-const CUR_Q_YEAR   = 2026;
-const CUR_Q_LABEL  = 'Q3/2026 (ก.ค. – ก.ย. 2569)';
+const MONTH_TH  = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const Q3_MONTHS = [7, 8, 9];
+const Q3_YEAR   = 2026;
+const PAGE_SIZE = 10;
+
+let TXN = [];           // raw transactions from SheetDB
+let QUOTA = {};         // { cardNumber: { name, empCode, position, team, company, plate, quota } }
 
 let currentTxn  = [];
 let currentPage = 1;
+let currentCard = '';
 
-/* ── helpers ── */
-function fmt(n, dec) {
-  dec = dec === undefined ? 2 : dec;
-  return Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+/* ── Helpers ── */
+function fmt(n, d = 2) {
+  return Number(n).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 
-function parseDateStr(s) {
-  if (!s) return null;
-  s = String(s).trim();
-  if (s.includes('/')) {
-    var parts = s.split('/').map(Number);
-    var d = parts[0], m = parts[1], y = parts[2];
-    if (y > 2500) y -= 543;
-    return { day: d, month: m, year: y };
-  }
-  if (s.includes('-')) {
-    var parts2 = s.split('-').map(Number);
-    var y2 = parts2[0], m2 = parts2[1], d2 = parts2[2];
-    if (y2 > 2500) y2 -= 543;
-    return { day: d2, month: m2, year: y2 };
-  }
-  return null;
+function initials(name) {
+  if (!name) return '?';
+  const p = name.trim().split(' ');
+  return p.length >= 2 ? p[0][0] + (p[1][0] || '') : (name[0] || '?');
 }
 
-function normCard(raw) {
+function padCard(raw) {
   return String(raw).replace(/\D/g, '').padStart(16, '0');
 }
 
-function pick(row) {
-  // helper to read a field trying multiple column name variants
-  return function(keys) {
-    for (var i = 0; i < keys.length; i++) {
-      if (row[keys[i]] !== undefined && row[keys[i]] !== '') return row[keys[i]];
+/* ── Load data from SheetDB ── */
+async function loadData() {
+  showLoader(true);
+  try {
+    const [txnRes, quotaRes] = await Promise.all([
+      fetch(API_TXN),
+      fetch(API_QUOTA)
+    ]);
+
+    if (!txnRes.ok || !quotaRes.ok) throw new Error('API error');
+
+    const txnRaw   = await txnRes.json();
+    const quotaRaw = await quotaRes.json();
+
+    /* --- Process Quota rows ---
+       Expected columns: card, name, empCode, position, team, company, plate, quota
+    */
+    QUOTA = {};
+    for (const row of quotaRaw) {
+      const card = padCard(row.card || row.Card || '');
+      if (!card || card === '0000000000000000') continue;
+      QUOTA[card] = {
+        name:     row.name     || row.Name     || '',
+        empCode:  row.empCode  || row.EmpCode  || row.emp_code || '',
+        position: row.position || row.Position || '',
+        team:     row.team     || row.Team     || '',
+        company:  row.company  || row.Company  || '',
+        plate:    row.plate    || row.Plate    || '',
+        quota:    parseFloat(row.quota || row.Quota || 0) || 0,
+      };
     }
-    return '';
-  };
+
+    /* --- Process Transaction rows ---
+       Expected columns: card, empCode, name, plate, product, qty, excl, dateStr
+       dateStr format: DD/MM/YYYY  (e.g. 13/01/2026)
+    */
+    TXN = [];
+    for (const row of txnRaw) {
+      const card    = padCard(row.card || row.Card || '');
+      if (!card || card === '0000000000000000') continue;
+
+      const dateStr = row.dateStr || row.date || row.Date || '';
+      let month = 0, year = 0;
+      if (dateStr) {
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          month = parseInt(parts[1], 10);
+          year  = parseInt(parts[2], 10);
+        }
+      }
+
+      TXN.push({
+        card,
+        empCode: row.empCode  || row.EmpCode  || '',
+        name:    row.name     || row.Name     || '',
+        plate:   row.plate    || row.Plate    || '',
+        product: row.product  || row.Product  || '',
+        qty:     parseFloat(row.qty  || row.Qty  || 0)  || 0,
+        excl:    parseFloat(row.excl || row.Excl || 0)  || 0,
+        dateStr,
+        month,
+        year,
+      });
+    }
+
+  } catch (e) {
+    console.error('Data load error:', e);
+    alert('ไม่สามารถโหลดข้อมูลจากระบบได้ กรุณาลองใหม่อีกครั้ง');
+  }
+  showLoader(false);
 }
 
-/* ── login ── */
-async function doLogin() {
-  var raw  = document.getElementById('cardInput').value.trim();
-  var card = normCard(raw);
-  var errEl = document.getElementById('loginError');
-  var btn   = document.getElementById('btnLogin');
+function showLoader(show) {
+  const btn = document.getElementById('loginBtn');
+  if (btn) btn.disabled = show;
+  const loginErr = document.getElementById('loginError');
+  if (show && loginErr) loginErr.style.display = 'none';
+}
 
-  errEl.style.display = 'none';
-  if (raw.replace(/\D/g, '').length < 13) {
-    errEl.textContent = '❌ กรุณากรอกหมายเลข Fleet Card อย่างน้อย 13 หลัก';
-    errEl.style.display = 'block';
+/* ── Login ── */
+function doLogin() {
+  const raw  = document.getElementById('cardInput').value.trim();
+  const card = raw.padStart(16, '0');
+  const err  = document.getElementById('loginError');
+  err.style.display = 'none';
+
+  if (raw.length < 13) {
+    err.textContent = '❌ กรุณากรอกหมายเลข Fleet Card ให้ครบ (อย่างน้อย 13 หลัก)';
+    err.style.display = 'block';
     return;
   }
 
-  btn.disabled = true;
-  btn.textContent = 'กำลังตรวจสอบ...';
+  /* Accept card if it appears in either QUOTA or TXN */
+  const inQuota = !!QUOTA[card];
+  const inTxn   = TXN.some(t => t.card === card);
 
-  try {
-    var res  = await fetch(API_QUOTA + '/search?card=' + encodeURIComponent(card));
-    if (!res.ok) throw new Error('quota api error');
-    var rows = await res.json();
-
-    if (!rows || rows.length === 0) {
-      errEl.textContent = '❌ ไม่พบ Fleet Card นี้ในระบบ กรุณาตรวจสอบตัวเลขอีกครั้ง';
-      errEl.style.display = 'block';
-    } else {
-      showDash(card, rows[0]);
-    }
-  } catch (e) {
-    errEl.textContent = '❌ เชื่อมต่อระบบไม่ได้ กรุณาลองใหม่อีกครั้ง';
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'เข้าดูข้อมูล →';
+  if (!inQuota && !inTxn) {
+    err.textContent = '❌ ไม่พบ Fleet Card นี้ในระบบ กรุณาตรวจสอบตัวเลขอีกครั้ง';
+    err.style.display = 'block';
+    return;
   }
+
+  showDash(card);
 }
 
 function doLogout() {
   document.getElementById('dashPage').style.display  = 'none';
   document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('cardInput').value = '';
-  currentTxn  = [];
-  currentPage = 1;
+  document.getElementById('cardInput').value         = '';
+  document.getElementById('loginError').style.display = 'none';
 }
 
-/* ── dashboard ── */
-async function showDash(card, quotaRow) {
+/* ── Dashboard ── */
+function showDash(card) {
+  currentCard = card;
+  const info  = QUOTA[card] || {};
+  const quota = info.quota || 0;
+
+  /* Derive info from first TXN if QUOTA missing */
+  const firstTxn = TXN.find(t => t.card === card) || {};
+  const name     = info.name    || firstTxn.name    || '—';
+  const empCode  = info.empCode || firstTxn.empCode || card;
+  const plate    = info.plate   || firstTxn.plate   || '—';
+
+  const myTxn  = TXN.filter(t => t.card === card);
+  const q3Txn  = myTxn.filter(t => t.year === Q3_YEAR && Q3_MONTHS.includes(t.month));
+  const usedLtr = q3Txn.reduce((s, t) => s + t.qty, 0);
+  const remain  = quota - usedLtr;
+  const pct     = quota > 0 ? Math.min(100, (usedLtr / quota) * 100) : 0;
+
+  /* Header */
+  document.getElementById('empAvatar').textContent = initials(name);
+  document.getElementById('empName').textContent   = name;
+  document.getElementById('empSub').textContent    = [info.position, info.team, info.company].filter(Boolean).join(' · ') || plate || '—';
+  document.getElementById('empBadge').textContent  = empCode ? `รหัส ${empCode}` : card;
+
+  /* KPIs */
+  document.getElementById('kpiQuota').textContent    = fmt(quota, 2);
+  document.getElementById('kpiUsed').textContent     = fmt(usedLtr, 2);
+  document.getElementById('kpiUsedPct').textContent  = `ลิตร (${pct.toFixed(1)}% ของโควต้า)`;
+  document.getElementById('kpiRemain').textContent   = fmt(remain, 2);
+
+  const bar = document.getElementById('kpiBar');
+  bar.style.width      = pct.toFixed(1) + '%';
+  bar.style.background = pct >= 90 ? '#DC2626' : pct >= 70 ? '#D97706' : '#16A34A';
+
+  const rc = document.getElementById('kpiRemainCard');
+  rc.className = 'kpi-card ' + (remain < 0 ? 'kpi-red' : 'kpi-amber');
+
+  /* Monthly summary */
+  const mMap = {};
+  myTxn.forEach(t => {
+    const k = `${t.year}-${String(t.month).padStart(2, '0')}`;
+    if (!mMap[k]) mMap[k] = { qty: 0, excl: 0, m: t.month, y: t.year };
+    mMap[k].qty  += t.qty;
+    mMap[k].excl += t.excl;
+  });
+
+  const months = Object.keys(mMap).sort();
+  const totQ   = months.reduce((s, k) => s + mMap[k].qty,  0);
+  const totE   = months.reduce((s, k) => s + mMap[k].excl, 0);
+
+  let mHtml = '';
+  if (!months.length) {
+    mHtml = '<tr><td colspan="4" class="empty">ยังไม่มีข้อมูลการเติมน้ำมัน</td></tr>';
+  } else {
+    months.forEach(k => {
+      const m   = mMap[k];
+      const avg = m.qty > 0 ? m.excl / m.qty : 0;
+      const isQ3 = Q3_MONTHS.includes(m.month) && m.y === Q3_YEAR;
+      mHtml += `<tr>
+        <td>${MONTH_TH[m.m - 1]} ${m.y}${isQ3 ? ' <span style="font-size:10px;background:#EFF6FF;color:#185FA5;padding:1px 6px;border-radius:4px;margin-left:4px;">Q3</span>' : ''}</td>
+        <td class="num">${fmt(m.qty, 2)}</td>
+        <td class="num">${fmt(avg, 2)}</td>
+        <td class="num">${fmt(m.excl, 2)}</td>
+      </tr>`;
+    });
+    const avgTot = totQ > 0 ? totE / totQ : 0;
+    mHtml += `<tr class="total-row">
+      <td>รวมทั้งหมด</td>
+      <td class="num">${fmt(totQ, 2)}</td>
+      <td class="num">${fmt(avgTot, 2)}</td>
+      <td class="num">${fmt(totE, 2)}</td>
+    </tr>`;
+  }
+  document.getElementById('monthBody').innerHTML = mHtml;
+
+  /* Transactions with pagination */
+  currentTxn = [...myTxn].sort((a, b) => {
+    const da = a.dateStr.split('/').reverse().join('');
+    const db = b.dateStr.split('/').reverse().join('');
+    return db.localeCompare(da);
+  });
+  currentPage = 1;
+  renderTxnPage();
+
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('dashPage').style.display  = 'block';
-
-  var get = pick(quotaRow);
-  var name     = get(['name','ชื่อพนักงาน']) || '—';
-  var empCode  = get(['empCode','รหัสพนักงาน']) || '—';
-  var company  = get(['company','บริษัท']) || '—';
-  var team     = get(['team','ทีม']) || '';
-  var position = get(['position','ตำแหน่ง']) || '';
-  var plate    = get(['plate','ทะเบียนรถ']) || '—';
-  var quota    = parseFloat(get(['quota','โควต้า','Quota']) || 0);
-
-  var initials = name.trim().split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase() || '?';
-  document.getElementById('empAvatar').textContent   = initials;
-  document.getElementById('empName').textContent     = name;
-  document.getElementById('empSub').textContent      = empCode + ' · ' + plate + ' · ' + company + (team ? ' · ' + team : '');
-  document.getElementById('empBadge').textContent    = position || company;
-  document.getElementById('quarterTag').textContent  = CUR_Q_LABEL;
-  document.getElementById('kpiQuota').textContent    = fmt(quota, 0);
-  document.getElementById('kpiQuotaUnit').textContent = 'ลิตร (' + CUR_Q_LABEL.split(' ')[0] + ')';
-  document.getElementById('kpiUsed').textContent     = '...';
-  document.getElementById('kpiRemain').textContent   = '...';
-
-  document.getElementById('txnBody').innerHTML   = '<tr><td colspan="9" class="loading">กำลังโหลดรายการ...</td></tr>';
-  document.getElementById('monthBody').innerHTML = '<tr><td colspan="4" class="loading">กำลังโหลด...</td></tr>';
-  document.getElementById('paginationWrap').innerHTML = '';
-
-  try {
-    var res2 = await fetch(API_TXN + '/search?card=' + encodeURIComponent(card));
-    if (!res2.ok) throw new Error('txn api error');
-    var rows2 = await res2.json();
-
-    var txns = (rows2 || []).map(function(r) {
-      var g = pick(r);
-      var dateStr = g(['dateStr','date','วันที่']) || '';
-      var parsed  = parseDateStr(dateStr);
-      var month   = parsed ? parsed.month : parseInt(g(['month','เดือน']) || 0);
-      var year    = parsed ? parsed.year  : parseInt(g(['year','ปี'])    || 0);
-      var qty     = parseFloat(g(['qty','จำนวนลิตร','Qty'])  || 0);
-      var excl    = parseFloat(g(['excl','Excl.VAT','ยอด','Amount']) || 0);
-      return {
-        card    : g(['card']) || card,
-        empCode : g(['empCode','รหัสพนักงาน']) || empCode,
-        name    : g(['name','ชื่อพนักงาน'])    || name,
-        plate   : g(['plate','ทะเบียนรถ'])     || plate,
-        product : g(['product','ประเภทน้ำมัน','Product']) || '—',
-        qty     : qty,
-        excl    : excl,
-        dateStr : dateStr,
-        month   : month,
-        year    : year,
-        _sort   : parsed ? (parsed.year * 10000 + parsed.month * 100 + parsed.day) : 0,
-      };
-    });
-
-    txns.sort(function(a, b){ return b._sort - a._sort; });
-    currentTxn  = txns;
-    currentPage = 1;
-
-    var qTxns   = txns.filter(function(t){ return CUR_Q_MONTHS.indexOf(t.month) >= 0 && t.year === CUR_Q_YEAR; });
-    var usedLtr = qTxns.reduce(function(s, t){ return s + t.qty; }, 0);
-    var remain  = quota - usedLtr;
-    var pct     = quota > 0 ? Math.min(100, (usedLtr / quota) * 100) : 0;
-
-    document.getElementById('kpiUsed').textContent    = fmt(usedLtr, 2);
-    document.getElementById('kpiUsedPct').textContent = 'ลิตร (' + fmt(pct, 1) + '% ของโควต้า)';
-    document.getElementById('kpiRemain').textContent  = fmt(remain, 2);
-
-    var bar = document.getElementById('kpiBar');
-    bar.style.width      = pct + '%';
-    bar.style.background = pct >= 90 ? '#DC2626' : pct >= 70 ? '#D97706' : '#16A34A';
-
-    var rc = document.getElementById('kpiRemainCard');
-    rc.classList.remove('kpi-amber','kpi-red');
-    rc.classList.add(remain < 0 ? 'kpi-red' : 'kpi-amber');
-
-    renderMonthTable(txns);
-    renderTxnPage();
-  } catch (e) {
-    document.getElementById('txnBody').innerHTML   = '<tr><td colspan="9" class="empty">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-    document.getElementById('monthBody').innerHTML = '<tr><td colspan="4" class="empty">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-  }
+  window.scrollTo(0, 0);
 }
 
-/* ── monthly summary ── */
-function renderMonthTable(txns) {
-  var map = {};
-  txns.forEach(function(t) {
-    var key = t.year + '-' + String(t.month).padStart(2, '0');
-    if (!map[key]) map[key] = { year: t.year, month: t.month, qty: 0, excl: 0 };
-    map[key].qty  += t.qty;
-    map[key].excl += t.excl;
-  });
-
-  var months = Object.values(map).sort(function(a,b){ return (b.year*100+b.month)-(a.year*100+a.month); });
-
-  if (months.length === 0) {
-    document.getElementById('monthBody').innerHTML = '<tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>';
-    return;
-  }
-
-  var totalQty = 0, totalExcl = 0, html = '';
-  months.forEach(function(m) {
-    totalQty  += m.qty;
-    totalExcl += m.excl;
-    var avg   = m.qty > 0 ? m.excl / m.qty : 0;
-    var isQ   = CUR_Q_MONTHS.indexOf(m.month) >= 0 && m.year === CUR_Q_YEAR;
-    var thYear = m.year + 543;
-    var badge = isQ ? ' <span class="quarter-tag" style="font-size:10px">Q ปัจจุบัน</span>' : '';
-    html += '<tr><td>' + MONTH_TH[m.month-1] + ' ' + thYear + badge + '</td>'
-          + '<td class="num">' + fmt(m.qty,2) + '</td>'
-          + '<td class="num">' + fmt(avg,2)   + '</td>'
-          + '<td class="num">' + fmt(m.excl,2)+ '</td></tr>';
-  });
-  var avgAll = totalQty > 0 ? totalExcl / totalQty : 0;
-  html += '<tr class="total-row"><td>รวมทั้งหมด</td>'
-        + '<td class="num">' + fmt(totalQty,2)  + '</td>'
-        + '<td class="num">' + fmt(avgAll,2)    + '</td>'
-        + '<td class="num">' + fmt(totalExcl,2) + '</td></tr>';
-
-  document.getElementById('monthBody').innerHTML = html;
-}
-
-/* ── transaction table ── */
 function renderTxnPage() {
-  var total = currentTxn.length;
-  var pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  currentPage = Math.min(currentPage, pages);
-  var start = (currentPage - 1) * PAGE_SIZE;
-  var slice = currentTxn.slice(start, start + PAGE_SIZE);
+  const info       = QUOTA[currentCard] || {};
+  const firstTxn   = TXN.find(t => t.card === currentCard) || {};
+  const total      = currentTxn.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
 
-  if (total === 0) {
-    document.getElementById('txnBody').innerHTML = '<tr><td colspan="9" class="empty">ไม่มีข้อมูล</td></tr>';
-    document.getElementById('paginationWrap').innerHTML = '';
-    return;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = currentTxn.slice(start, start + PAGE_SIZE);
+
+  let tHtml = '';
+  if (!slice.length) {
+    tHtml = '<tr><td colspan="9" class="empty">ไม่มีรายการเติมน้ำมัน</td></tr>';
+  } else {
+    slice.forEach(t => {
+      const rate = t.qty > 0 ? t.excl / t.qty : 0;
+      const displayName    = t.name    || info.name    || firstTxn.name    || '—';
+      const displayEmpCode = t.empCode || info.empCode || firstTxn.empCode || '—';
+      const displayPlate   = t.plate   || info.plate   || firstTxn.plate   || '—';
+      tHtml += `<tr>
+        <td>${t.dateStr}</td>
+        <td style="font-family:monospace;font-size:12px;color:#888">${t.card}</td>
+        <td>${displayEmpCode}</td>
+        <td>${displayName}</td>
+        <td>${displayPlate}</td>
+        <td>${t.product || '—'}</td>
+        <td class="num">${fmt(t.qty, 2)}</td>
+        <td class="num">${fmt(rate, 2)}</td>
+        <td class="num">${fmt(t.excl, 2)}</td>
+      </tr>`;
+    });
   }
+  document.getElementById('txnBody').innerHTML = tHtml;
 
-  var html = '';
-  slice.forEach(function(t) {
-    var rate = t.qty > 0 ? t.excl / t.qty : 0;
-    html += '<tr>'
-      + '<td>' + t.dateStr + '</td>'
-      + '<td style="font-family:monospace;letter-spacing:1px">' + t.card + '</td>'
-      + '<td>' + t.empCode + '</td>'
-      + '<td>' + t.name    + '</td>'
-      + '<td>' + t.plate   + '</td>'
-      + '<td>' + t.product + '</td>'
-      + '<td class="num">' + fmt(t.qty,2)  + '</td>'
-      + '<td class="num">' + fmt(rate,2)   + '</td>'
-      + '<td class="num">' + fmt(t.excl,2) + '</td>'
-      + '</tr>';
-  });
-  document.getElementById('txnBody').innerHTML = html;
+  const pgWrap = document.getElementById('paginationWrap');
+  if (total <= PAGE_SIZE) { pgWrap.innerHTML = ''; return; }
 
-  var wrap = document.getElementById('paginationWrap');
-  var pg = '<span class="pg-info">แสดง ' + (start+1) + '–' + Math.min(start+PAGE_SIZE,total) + ' จาก ' + total + ' รายการ</span>';
-  pg += '<button class="pg-btn" onclick="goPage(' + (currentPage-1) + ')" ' + (currentPage<=1?'disabled':'') + '>‹ ก่อนหน้า</button>';
+  let pgHtml = `<span class="pg-info">แสดง ${start + 1}–${Math.min(start + PAGE_SIZE, total)} จาก ${total} รายการ</span>`;
+  pgHtml += `<button class="pg-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ ก่อนหน้า</button>`;
 
-  pageRange(currentPage, pages).forEach(function(p) {
-    if (p === '…') pg += '<span style="padding:5px 4px;color:#aaa">…</span>';
-    else pg += '<button class="pg-btn' + (p===currentPage?' active':'') + '" onclick="goPage(' + p + ')">' + p + '</button>';
-  });
+  let startP = Math.max(1, currentPage - 2);
+  let endP   = Math.min(totalPages, startP + 4);
+  startP     = Math.max(1, endP - 4);
 
-  pg += '<button class="pg-btn" onclick="goPage(' + (currentPage+1) + ')" ' + (currentPage>=pages?'disabled':'') + '>ถัดไป ›</button>';
-  wrap.innerHTML = pg;
-}
-
-function pageRange(cur, total) {
-  if (total <= 7) {
-    var r = [];
-    for (var i = 1; i <= total; i++) r.push(i);
-    return r;
+  if (startP > 1) pgHtml += `<button class="pg-btn" onclick="goPage(1)">1</button>${startP > 2 ? '<span style="color:#aaa;padding:0 4px">…</span>' : ''}`;
+  for (let p = startP; p <= endP; p++) {
+    pgHtml += `<button class="pg-btn${p === currentPage ? ' active' : ''}" onclick="goPage(${p})">${p}</button>`;
   }
-  var set = [1, total, cur, cur-1, cur+1].filter(function(p){ return p>=1&&p<=total; });
-  set = set.filter(function(v,i,a){ return a.indexOf(v)===i; }).sort(function(a,b){ return a-b; });
-  var result = [], prev = 0;
-  set.forEach(function(p){ if (p-prev>1) result.push('…'); result.push(p); prev=p; });
-  return result;
+  if (endP < totalPages) pgHtml += `${endP < totalPages - 1 ? '<span style="color:#aaa;padding:0 4px">…</span>' : ''}<button class="pg-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  pgHtml += `<button class="pg-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>ถัดไป ›</button>`;
+  pgWrap.innerHTML = pgHtml;
 }
 
 function goPage(p) {
+  const totalPages = Math.ceil(currentTxn.length / PAGE_SIZE);
+  if (p < 1 || p > totalPages) return;
   currentPage = p;
   renderTxnPage();
-  document.getElementById('dashPage').scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('txnBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-/* ── xlsx export ── */
 function downloadXlsx() {
-  if (!currentTxn.length) return;
-  var data = currentTxn.map(function(t) {
+  if (!currentTxn.length) { alert('ไม่มีข้อมูลสำหรับดาวน์โหลด'); return; }
+  const info     = QUOTA[currentCard] || {};
+  const firstTxn = TXN.find(t => t.card === currentCard) || {};
+  const rows = currentTxn.map(t => {
+    const rate = t.qty > 0 ? t.excl / t.qty : 0;
     return {
-      'วันที่'          : t.dateStr,
-      'Fleet Card'      : t.card,
-      'รหัสพนักงาน'     : t.empCode,
-      'ชื่อพนักงาน'     : t.name,
-      'ทะเบียนรถ'       : t.plate,
-      'ประเภทน้ำมัน'    : t.product,
-      'จำนวนลิตร'       : t.qty,
-      'อัตรา (บ./ล.)'   : t.qty > 0 ? +(t.excl / t.qty).toFixed(4) : 0,
-      'Excl.VAT (บาท)'  : t.excl,
+      'วันที่':                   t.dateStr,
+      'Fleet Card':               t.card,
+      'รหัสพนักงาน':             t.empCode || info.empCode || '',
+      'ชื่อพนักงาน':             t.name    || info.name    || '',
+      'ทะเบียนรถ':               t.plate   || info.plate   || '',
+      'ประเภทน้ำมัน':            t.product || '',
+      'จำนวนลิตร':               t.qty,
+      'อัตรา (บ./ล.)':           parseFloat(rate.toFixed(4)),
+      'ยอดรวม Excl.VAT (บาท)':   t.excl,
     };
   });
-  var ws = XLSX.utils.json_to_sheet(data);
-  var wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
-  XLSX.writeFile(wb, 'FleetCard_' + (currentTxn[0] ? currentTxn[0].name : 'export') + '.xlsx');
+  const ws  = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{ wch: 12 }, { wch: 18 }, { wch: 14 }, { wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 22 }];
+  const wb  = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'รายการเติมน้ำมัน');
+  const empName = (info.name || firstTxn.name || currentCard).replace(/[/\\?*\[\]]/g, '_');
+  XLSX.writeFile(wb, `FleetCard_${empName}.xlsx`);
 }
+
+/* ── Bootstrap ── */
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadData();
+});
 </script>
 </body>
 </html>
