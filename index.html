@@ -551,7 +551,7 @@ function renderApp(card, q, txAll){
           ${prevCards.map(c=>`<span class="card-chip old" title="บัตรเดิม">${c} <em>เดิม</em></span>`).join("")}
         </div>
       </div>
-      <button class="btn-ghost" id="logoutBtn">เปลี่ยนบัตร</button>
+      <button class="btn-ghost" id="logoutBtn">ออกจากระบบ</button>
     </div>
 
     ${hasQuota ? `
@@ -564,7 +564,7 @@ function renderApp(card, q, txAll){
           <div class="b"><div class="m">May</div><div class="v">${fmt(qMay,0)}</div></div>
           <div class="b"><div class="m">Jun *</div><div class="v">${fmt(qJun,0)}</div></div>
         </div>
-        <div class="kpi-sub">หน่วย: ลิตร — ใช้เป็นฐานกำหนดโควต้าไตรมาส<br><b>*</b> มิ.ย. คิดแบบ Prorata 15 วัน</div>
+        <div class="kpi-sub">หน่วย: ลิตร — ใช้เป็นฐานกำหนดโควต้าไตรมาส<br><b>*</b> มิ.ย. คิดแบบ Prorata จากข้อมูล 15 วัน เป็นเต็ม 30 วัน</div>
       </div>
       <div class="card card-hero">
         <div class="kpi-title">โควต้าสำหรับ Q3 2026</div>
