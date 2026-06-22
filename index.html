@@ -255,7 +255,7 @@
 <main id="app"></main>
 
 <script>
-const TRANSACTION_URL = "https://script.google.com/macros/s/AKfycbyqToOpf9-jeB5bNMPbj04wu0KKXxKB2DktbfM3KLKdx_f-EciO8WZ-ze9fm50Yoheqog/exec";
+const TRANSACTION_URL = "https://script.google.com/macros/s/AKfycbx0HIJlONCsvfR4Eg-ecLUCFNEnSH7U0RSUivPgPF3RWdjRZ_UChATfn1O7A35X4bi4Cw/exec";
 const QUOTA_URL       = "https://script.google.com/macros/s/AKfycby-ACYQTAEAi1NB6GlGoqKQbne2GcxMIPY4uglRj-AQ51RWz2HQz01oz6PBPsYrZgbh/exec";
 
 const PAGE_SIZE = 10;
@@ -280,21 +280,20 @@ function empKey(s){ return String(s==null?"":s).trim().toUpperCase(); }
 function fmt(n,dec=2){
   return Number(n).toLocaleString("th-TH",{minimumFractionDigits:dec,maximumFractionDigits:dec});
 }
-// tolerant date parser: MM-DD-YYYY, YYYY-MM-DD, "/" "." separators, 2-digit
+// tolerant date parser: DD-MM-YYYY, YYYY-MM-DD, "/" "." separators, 2-digit
 // years, Buddhist years (>2400 -> CE), and stray chars / time suffixes.
-// NOTE: source feed is month-first (MM-DD-YYYY). The swap below still rescues
-// any rows that arrive day-first (e.g. 15-06-2026) by detecting month>12.
+// Source sheet mixes day-first (DD-MM-YYYY) and year-first (YYYY-MM-DD).
 function parseDate(s){
   if(s===null||s===undefined) return null;
   const nums = String(s).match(/\d+/g);   // pull out numeric groups only
   if(!nums || nums.length<3) return null;
   let a=+nums[0], b=+nums[1], c=+nums[2];
   let d,m,y;
-  if(a>31){ y=a; m=b; d=c; }      // year-first  (e.g. 2026-06-22)
-  else    { m=a; d=b; y=c; }      // month-first (e.g. 06-22-2026)
+  if(a>31){ y=a; m=b; d=c; }      // year-first (e.g. 2026-06-22)
+  else    { d=a; m=b; y=c; }      // day-first  (e.g. 22-06-2026)
   if(y<100) y+=2000;
   if(y>2400) y-=543;              // Buddhist Era -> CE
-  if(m>12 && d<=12){ const t=m; m=d; d=t; }  // rescue day-first rows (e.g. 15-06)
+  if(m>12 && d<=12){ const t=m; m=d; d=t; }  // tolerate reversed day/month
   if(!d||!m||!y||m<1||m>12||d<1||d>31) return null;
   return { y, m, d, key:`${y}-${String(m).padStart(2,"0")}`, ts:new Date(y,m-1,d).getTime() };
 }
