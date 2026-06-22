@@ -370,7 +370,7 @@ async function ensureData(){
 function latestTxDate(){
   let best=null;
   for(const r of (DATA.tx||[])){
-    const dt = parseDate(r["TRN_DATE"]) || parseDate(r["POST_DATE"]) || parseDate(r["Date"]);
+    const dt = parseDate(r["POST_DATE"]) || parseDate(r["TRN_DATE"]) || parseDate(r["Date"]);
     if(dt && (!best || dt.ts>best.ts)) best=dt;
   }
   return best;
@@ -490,7 +490,7 @@ function renderApp(card, q, txAll){
   const parsed = txAll.map(r=>{
     const litre = toNum(r["QTY_LITRE"]);
     const excl  = toNum(r["EXCLUDE_VAT_AMOUNT"]);
-    const dt = parseDate(r["TRN_DATE"]) || parseDate(r["POST_DATE"]) || parseDate(r["Date"]);
+    const dt = parseDate(r["POST_DATE"]) || parseDate(r["TRN_DATE"]) || parseDate(r["Date"]);
     return {
       raw:r, dt,
       litre, excl,
@@ -721,7 +721,7 @@ function renderTxPage(){
 /* ---------- xlsx export (all rows for this card) ---------- */
 function exportXLSX(name){
   const rows = VIEW.txRows.map(t=>({
-    "วันที่ (TRN_DATE)": `${t.dt.d.toString().padStart(2,"0")}-${t.dt.m.toString().padStart(2,"0")}-${t.dt.y}`,
+    "วันที่ (POST_DATE)": `${t.dt.d.toString().padStart(2,"0")}-${t.dt.m.toString().padStart(2,"0")}-${t.dt.y}`,
     "Fleet card": fmtCard(t.cardNo),
     "รหัสพนักงาน": t.empCode,
     "ชื่อพนักงาน": t.name,
