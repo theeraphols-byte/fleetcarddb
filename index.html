@@ -432,6 +432,12 @@ async function doLogin(){
       return;
     }
     refreshUpdatedLabel();
+    // track: บัตรไหนถูก search (GA ติดเวลา/วันที่ให้อัตโนมัติ)
+    if (typeof gtag === "function") {
+      gtag("event", "card_search", {
+        fleet_card: fmtCard(card)
+      });
+    }
     renderApp(card, quotaRow, txRows);
   }catch(err){
     $("#loadingScreen").style.display="none";
