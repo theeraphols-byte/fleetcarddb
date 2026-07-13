@@ -507,7 +507,7 @@ function renderApp(card, q, txAll){
   // normalize tx -> parsed
   const parsed = txAll.map(r=>{
     const litre = toNum(r["QTY_LITRE"]);
-    const excl  = toNum(r["EXCLUDE_VAT_AMOUNT"]);
+    const excl  = toNum(r["AMT_BAHT"]);
     const dt = parseDate(r["POST_DATE"]) || parseDate(r["TRN_DATE"]) || parseDate(r["Date"]);
     return {
       raw:r, dt,
@@ -629,7 +629,7 @@ function renderApp(card, q, txAll){
     <div class="section-label">สรุปรายเดือน (ตั้งแต่ ม.ค. 2026)</div>
     <div class="table-card">
       <div class="table-head">
-        <div><h3>การเติมน้ำมันรายเดือน</h3><div class="sub">ราคา/ลิตร = ยอดไม่รวม VAT ÷ จำนวนลิตรรวม</div></div>
+        <div><h3>การเติมน้ำมันรายเดือน</h3><div class="sub">ราคา/ลิตร = ยอดรวม VAT ÷ จำนวนลิตรรวม</div></div>
       </div>
       <div class="scroll">
         <table>
@@ -637,7 +637,7 @@ function renderApp(card, q, txAll){
             <th class="l">เดือน</th>
             <th class="num">จำนวนลิตร</th>
             <th class="num">ราคา/ลิตร</th>
-            <th class="num">ยอด (ไม่รวม VAT)</th>
+            <th class="num">ยอด (รวม VAT)</th>
           </tr></thead>
           <tbody>
             ${ months.length ? months.map(m=>{
@@ -664,7 +664,7 @@ function renderApp(card, q, txAll){
     <div class="section-label">รายการเติมน้ำมัน (ราย transaction)</div>
     <div class="table-card">
       <div class="table-head">
-        <div><h3>ประวัติการเติม</h3><div class="sub">ข้อมูลอัปเดตถึง ${fmtDMY(latestTxDate())} • เรียงจากใหม่ไปเก่า • ราคา/ลิตร = ยอดไม่รวม VAT ÷ จำนวนลิตร</div></div>
+        <div><h3>ประวัติการเติม</h3><div class="sub">ข้อมูลอัปเดตถึง ${fmtDMY(latestTxDate())} • เรียงจากใหม่ไปเก่า • ราคา/ลิตร = ยอดรวม VAT ÷ จำนวนลิตร</div></div>
         <button class="btn-dl" id="dlBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
           ดาวน์โหลด .xlsx
@@ -680,7 +680,7 @@ function renderApp(card, q, txAll){
             <th class="l">ทะเบียนรถ</th>
             <th class="num">จำนวนลิตร</th>
             <th class="num">ราคา/ลิตร</th>
-            <th class="num">ไม่รวม VAT</th>
+            <th class="num">รวม VAT</th>
           </tr></thead>
           <tbody id="txBody"></tbody>
         </table>
@@ -746,7 +746,7 @@ function exportXLSX(name){
     "ทะเบียนรถ": t.plate,
     "จำนวนลิตร": Number(t.litre.toFixed(2)),
     "ราคา/ลิตร": Number(t.pricePerL.toFixed(2)),
-    "ไม่รวม VAT": Number(t.excl.toFixed(2))
+    "รวม VAT": Number(t.excl.toFixed(2))
   }));
   const ws = XLSX.utils.json_to_sheet(rows.length?rows:[{"ไม่มีข้อมูล":""}]);
   ws["!cols"] = [{wch:16},{wch:21},{wch:14},{wch:22},{wch:14},{wch:12},{wch:11},{wch:14}];
